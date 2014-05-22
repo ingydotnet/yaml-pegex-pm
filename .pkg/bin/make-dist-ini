@@ -9,6 +9,7 @@ use IO::All;
 my $meta = Load io->file('Meta')->all;
 my $cpan = delete($meta->{'=cpan'}) || {};
 my $data = merge($cpan, $meta);
+($data->{namepath} = $meta->{name}) =~ s/-/\//g;
 
 print tt
     ->path(['./.pkg'])

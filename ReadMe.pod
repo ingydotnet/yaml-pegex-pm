@@ -18,13 +18,68 @@ YAML::Pegex - YAML Parser using Pegex
 
 YAML::Pegex is a YAML parser written in Pegex.
 
+This module is not intended to be used in the real world. The I<code> of
+YAML::Pegex is intended to replace the Pure Perl YAML modules: C<YAML.pm> and
+C<YAML::Tiny>.
+
+Let me explain.
+
+Pegex is a parsing framework with the following benefits:
+
+=over
+
+=item * Clean, crisp, and working grammars define languages.
+
+See L<https://github.com/ingydotnet/yaml-pegex-pm/blob/master/share/yaml.pgx>
+for the current YAML::Pegex grammar.
+This means that almost anyone can identify and fix bugs in the language.
+
+=back
+
+=over
+
+=item * Pegex is fast.
+
+For pure Perl parsing, Pegex has been tuned to be very fast. Only benchmarks
+can speak accurately to speed, but trust me it's crazy fast so far, and can be
+made faster with a C<libpegex>.
+Pegex preoptimizes its grammars before a parse. Many of these optimizations
+are done before the grammar goes to CPAN, so no C<require> penalties for those
+optimizations.
+I'm confident that YAML::Pegex will out perform YAML::Tiny.
+
+=back
+
+=over
+
+=item * Pegex is multi language.
+
+The same grammar can be used for JavaScript, Python, Ruby, PHP, Java
+and so on.
+This is the key to making YAML (a fairly complex serialization language) be
+truly cross-language as it was intended.
+
+=back
+
+The idea for YAML::Pegex is to build it up test by test. Once it passes all
+the YAML::* tests it can replace the pure Perl YAML modules.
+
+This is only the parser, but that's the hardest part by far. YAML::Tiny and
+YAML.pm can still be different. YAML.pm will build a full stack which can do
+many amazing operations that have not been done with YAML in Perl yet. (Python
+and other languages have these things.) YAML::Tiny will just load yaml
+straight to Perl as quickly as possible.
+
+After that we can possibly replace YAML::XS by writing C<libpegex>. I have no
+idea how they would compare speedwise, but the other benefits would apply.
+
 =head1 AUTHOR
 
 Ingy döt Net <ingy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2010, 2011, 2012, 2013, 2014. Ingy döt Net.
+Copyright (c) 2014. Ingy döt Net.
 
 This program is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
