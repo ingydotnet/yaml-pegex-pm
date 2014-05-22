@@ -1,0 +1,35 @@
+=meta: 0.0.1
+
+name: YAML-Pegex
+version: 0.0.1
+abstract: YAML Parser in Pegex
+homepage:
+- http://yaml.org
+- http://pegex.org
+
+license: perl
+copyright: 2014. Ingy döt Net.
+author:
+  name: Ingy döt Net
+  email: ingy@cpan.org
+  github: ingydotnet
+  twitter: ingydotnet
+  freenode: ingy
+  homepage: http://ingy.net
+
+requires:
+  perl: 5.8.1
+  Pegex: 0.30
+test:
+  requires:
+    YAML::XS: 0
+
+devel:
+  git: git@github.org/ingydotnet/pegex-pm
+  irc: irc.freenode.net/pegex
+  bug: https://github.com/ingydotnet/pegex-pm/issues/
+
+=cpan:
+  include_testml: 1
+
+=travis: perl

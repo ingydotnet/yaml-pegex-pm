@@ -1,0 +1,8 @@
+=== Simple Mapping
+--- yaml
+foo: bar
+--- events
+MAPPING_START
+SCALAR,1 foo
+SCALAR,1 bar
+MAPPING_END

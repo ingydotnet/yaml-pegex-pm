@@ -1,0 +1,15 @@
+document: mapping | sequence | scalar
+
+mapping: key-value-pair* %% EOL
+
+key-value-pair: key mapping-separator value
+
+key: scalar
+
+value: scalar
+
+scalar: /([^: CR NL]+)/
+
+mapping-separator: / COLON SPACE+ /
+
+# sequence: `not yet implemented`
