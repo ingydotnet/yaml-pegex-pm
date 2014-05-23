@@ -13,6 +13,9 @@ sub final {
     if ($self->{kind}[0] eq 'mapping') {
         $self->send('MAPPING_END');
     }
+    elsif ($self->{kind}[0] eq 'sequence') {
+        $self->send('SEQUENCE_END');
+    }
     join '', map { "$_\n" } @{$self->{events}};
 }
 

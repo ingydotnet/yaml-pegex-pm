@@ -1,0 +1,7 @@
+=== Single Entry Sequence
+--- yaml
+- foo
+--- events
+SEQUENCE_START
+SCALAR,plain foo
+SEQUENCE_END

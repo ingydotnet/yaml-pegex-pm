@@ -1,8 +1,24 @@
-=== Simple Mapping
+=== Single Pair Mapping
 --- yaml
 foo: bar
 --- events
 MAPPING_START
-SCALAR,1 foo
-SCALAR,1 bar
+SCALAR,plain foo
+SCALAR,plain bar
 MAPPING_END
+
+=== Multiple Pair Mapping
+--- yaml
+foo: blue
+bar: arrr
+baz: jazz
+--- events
+MAPPING_START
+SCALAR,plain foo
+SCALAR,plain blue
+SCALAR,plain bar
+SCALAR,plain arrr
+SCALAR,plain baz
+SCALAR,plain jazz
+MAPPING_END
+

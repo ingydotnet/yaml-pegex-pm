@@ -1,6 +1,14 @@
-document: mapping | sequence | scalar
+document:
+  | block-sequence
+  | block-mapping
+  | scalar
 
-mapping: key-value-pair* %% EOL
+block-sequence: block-sequence-entry+
+
+block-sequence-entry:
+  / DASH SPACE+ scalar EOL /
+
+block-mapping: key-value-pair+ %% EOL
 
 key-value-pair: key mapping-separator value
 
@@ -11,5 +19,3 @@ value: scalar
 scalar: /([^: CR NL]+)/
 
 mapping-separator: / COLON SPACE+ /
-
-# sequence: `not yet implemented`
