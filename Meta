@@ -1,7 +1,7 @@
 =meta: 0.0.1
 
 name: YAML-Pegex
-version: 0.0.2
+version: 0.0.3
 abstract: YAML Parser in Pegex
 homepage:
 - http://yaml.org
