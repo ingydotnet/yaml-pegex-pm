@@ -12,7 +12,7 @@ TestML->new(
 use base 'TestML::Bridge';
 use TestML::Util;
 use YAML::Pegex::Grammar;
-use YAML::Pegex::AST;
+use YAML::Pegex::Receiver::Test;
 
 sub parse {
     my ($self, $yaml) = @_;
@@ -20,7 +20,7 @@ sub parse {
     $yaml = $yaml->{value};
     my $parser = Pegex::Parser->new(
         grammar => 'YAML::Pegex::Grammar'->new,
-        receiver => "YAML::Pegex::AST"->new,
+        receiver => "YAML::Pegex::Receiver::Test"->new,
         # debug => 1,
     );
     # use XXX; XXX($parser->grammar->tree);

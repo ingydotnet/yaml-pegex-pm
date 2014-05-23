@@ -1,11 +1,16 @@
 use strict;
-package YAML::Pegex::AST;
+package YAML::Pegex::Receiver;
 use base 'Pegex::Tree';
-use XXX;
 
 sub initial {
     my ($self) = @_;
-    $self->{events} = [];
+    $self->setup;
+    $self->send('STREAM_START');
+    $self->send('DOCUMENT_START');
+}
+
+sub setup {
+    my ($self) = @_;
     $self->{stack} = [];
     $self->{kind} = [];
     $self->{level} = 0;
@@ -16,13 +21,15 @@ sub final {
     if ($self->{kind}[0] eq 'mapping') {
         $self->send('MAPPING_END');
     }
-    join '', map { "$_\n" } @{$self->{events}};
+    $self->send('DOCUMENT_END');
+    $self->send('STREAM_END');
+    return $self->data;
 }
+
 
 sub got_scalar {
     my ($self, $got) = @_;
     if ($self->{kind}[$self->{level}]) {
-        warn "2 $got";
         $self->send(SCALAR => $got, 1)
     }
     else {
@@ -38,20 +45,9 @@ sub got_mapping_separator {
         $self->send('MAPPING_START');
         my $key = pop @{$self->{stack}};
         shift @$key;
-        warn "2 $key->[1]";
         $self->send(SCALAR => @$key);
     }
     return;
-}
-
-sub send {
-    my ($self, $name, $value, $flag) = @_;
-    $flag ||= 0;
-    my $event = $name;
-    if ($name eq 'SCALAR') {
-        $event .= ",$flag $value"
-    }
-    push @{$self->{events}}, $event;
 }
 
 1;
