@@ -1,4 +1,4 @@
-=== Single Pair Mapping
+=== Single Pair Block Mapping
 --- yaml
 foo: bar
 --- events
@@ -7,7 +7,7 @@ SCALAR,plain foo
 SCALAR,plain bar
 MAPPING_END
 
-=== Multiple Pair Mapping
+=== Multiple Pair Block Mapping
 --- yaml
 foo: blue
 bar: arrr
@@ -22,3 +22,13 @@ SCALAR,plain baz
 SCALAR,plain jazz
 MAPPING_END
 
+=== Flow Mapping
+--- yaml
+{foo: you, bar: far}
+--- events
+MAPPING_START
+SCALAR,plain foo
+SCALAR,plain you
+SCALAR,plain bar
+SCALAR,plain far
+MAPPING_END

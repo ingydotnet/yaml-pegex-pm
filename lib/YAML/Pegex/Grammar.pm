@@ -5,7 +5,9 @@ use constant file => 'share/yaml.pgx';
 
 sub make_tree {
   {
+    '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
+    '+version' => '0.0.1',
     'EOL' => {
       '.rgx' => qr/\G\r?\n/
     },
@@ -16,7 +18,7 @@ sub make_tree {
       '.rgx' => qr/\G/
     },
     'block_key' => {
-      '.ref' => 'node_scalar'
+      '.ref' => 'block_scalar'
     },
     'block_mapping' => {
       '.all' => [
@@ -73,18 +75,47 @@ sub make_tree {
     'block_ondent' => {
       '.rgx' => qr/\G/
     },
+    'block_scalar' => {
+      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`]).+?(?=:\ |\r?\n|\z))/
+    },
     'block_sequence' => {
-      '+min' => 1,
-      '.ref' => 'block_sequence_entry'
+      '.all' => [
+        {
+          '.ref' => 'block_sequence_entry'
+        },
+        {
+          '+min' => 0,
+          '-flat' => 1,
+          '.all' => [
+            {
+              '.ref' => 'list_separator'
+            },
+            {
+              '.ref' => 'block_sequence_entry'
+            }
+          ]
+        },
+        {
+          '+max' => 1,
+          '.ref' => 'list_separator'
+        }
+      ]
     },
     'block_sequence_entry' => {
-      '.rgx' => qr/\G\-\ +([^:\r\n]+)\r?\n/
+      '.rgx' => qr/\G\-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`]).+?(?=:\ |\r?\n|\z))\r?\n/
     },
     'block_undent' => {
       '.rgx' => qr/\G/
     },
     'block_value' => {
-      '.ref' => 'node_scalar'
+      '.any' => [
+        {
+          '.ref' => 'block_scalar'
+        },
+        {
+          '.ref' => 'flow_node'
+        }
+      ]
     },
     'document_foot' => {
       '.rgx' => qr/\G\.\.\.\r?\n/
@@ -93,22 +124,119 @@ sub make_tree {
       '.rgx' => qr/\G\-\-\-(?:\ +|(?=\r?\n))/
     },
     'flow_mapping' => {
-      '.rgx' => qr/\G\s*\{\s*/
+      '.all' => [
+        {
+          '.rgx' => qr/\G\s*\{\s*/
+        },
+        {
+          '+max' => 1,
+          '.all' => [
+            {
+              '.ref' => 'flow_mapping_pair'
+            },
+            {
+              '+min' => 0,
+              '-flat' => 1,
+              '.all' => [
+                {
+                  '.ref' => 'list_separator'
+                },
+                {
+                  '.ref' => 'flow_mapping_pair'
+                }
+              ]
+            },
+            {
+              '+max' => 1,
+              '.ref' => 'list_separator'
+            }
+          ]
+        },
+        {
+          '.rgx' => qr/\G\s*\}\s*/
+        }
+      ]
+    },
+    'flow_mapping_pair' => {
+      '.all' => [
+        {
+          '.ref' => 'flow_node'
+        },
+        {
+          '.ref' => 'mapping_separator'
+        },
+        {
+          '.ref' => 'flow_node'
+        }
+      ]
+    },
+    'flow_node' => {
+      '.any' => [
+        {
+          '.ref' => 'flow_sequence'
+        },
+        {
+          '.ref' => 'flow_mapping'
+        },
+        {
+          '.ref' => 'flow_scalar'
+        }
+      ]
+    },
+    'flow_scalar' => {
+      '.rgx' => qr/\G("[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`]).+?(?=[&\*\#\{\}\[\]%,]|:\ |,\ |\r?\n|\z))/
     },
     'flow_sequence' => {
-      '.rgx' => qr/\G\s*\[\s*/
+      '.all' => [
+        {
+          '.rgx' => qr/\G\s*\[\s*/
+        },
+        {
+          '+max' => 1,
+          '.all' => [
+            {
+              '.ref' => 'flow_sequence_entry'
+            },
+            {
+              '+min' => 0,
+              '-flat' => 1,
+              '.all' => [
+                {
+                  '.ref' => 'list_separator'
+                },
+                {
+                  '.ref' => 'flow_sequence_entry'
+                }
+              ]
+            },
+            {
+              '+max' => 1,
+              '.ref' => 'list_separator'
+            }
+          ]
+        },
+        {
+          '.rgx' => qr/\G\s*\]\s*/
+        }
+      ]
+    },
+    'flow_sequence_entry' => {
+      '.ref' => 'flow_node'
     },
     'ignore_line' => {
       '.rgx' => qr/\G(?:[\ \t]*|\#.*)\r?\n/
+    },
+    'list_separator' => {
+      '.rgx' => qr/\G,\ +/
     },
     'mapping_separator' => {
       '.rgx' => qr/\G:\ +/
     },
     'node_alias' => {
-      '.rgx' => qr/\G&(\w+)/
+      '.rgx' => qr/\G\*(\w+)/
     },
     'node_anchor' => {
-      '.rgx' => qr/\G&(\w+)/
+      '.rgx' => qr/\G\&(\w+)/
     },
     'node_prefix' => {
       '.any' => [
@@ -152,28 +280,10 @@ sub make_tree {
         }
       ]
     },
-    'node_scalar' => {
-      '.rgx' => qr/\G([^:\r\n]+)/
-    },
     'node_tag' => {
       '.rgx' => qr/\G!!?(\w+)/
     },
-    'yaml_document' => {
-      '.all' => [
-        {
-          '+max' => 1,
-          '.ref' => 'document_head'
-        },
-        {
-          '.ref' => 'yaml_node'
-        },
-        {
-          '+max' => 1,
-          '.ref' => 'document_foot'
-        }
-      ]
-    },
-    'yaml_node' => {
+    'top_node' => {
       '.all' => [
         {
           '+max' => 1,
@@ -182,24 +292,43 @@ sub make_tree {
         {
           '.any' => [
             {
+              '.ref' => 'node_alias'
+            },
+            {
               '.ref' => 'flow_mapping'
             },
             {
               '.ref' => 'flow_sequence'
             },
             {
-              '.ref' => 'block_mapping'
-            },
-            {
               '.ref' => 'block_sequence'
             },
             {
-              '.ref' => 'node_scalar'
+              '.ref' => 'block_mapping'
             },
             {
-              '.ref' => 'node_alias'
+              '.ref' => 'block_scalar'
             }
           ]
+        }
+      ]
+    },
+    'yaml_document' => {
+      '.all' => [
+        {
+          '+max' => 1,
+          '.ref' => 'document_head'
+        },
+        {
+          '.ref' => 'top_node'
+        },
+        {
+          '+max' => 1,
+          '.ref' => 'ignore_line'
+        },
+        {
+          '+max' => 1,
+          '.ref' => 'document_foot'
         }
       ]
     },

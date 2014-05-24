@@ -30,7 +30,18 @@ sub final {
 }
 
 
-sub got_node_scalar {
+sub got_block_scalar {
+    my ($self, $got) = @_;
+    if ($self->{kind}[$self->{level}]) {
+        $self->send(SCALAR => $got, 'plain')
+    }
+    else {
+        push @{$self->{stack}}, [scalar => $got, 'plain'];
+    }
+    return;
+}
+
+sub got_flow_scalar {
     my ($self, $got) = @_;
     if ($self->{kind}[$self->{level}]) {
         $self->send(SCALAR => $got, 'plain')
