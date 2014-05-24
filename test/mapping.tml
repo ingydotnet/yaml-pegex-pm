@@ -2,10 +2,10 @@
 --- yaml
 foo: bar
 --- events
-MAPPING_START
+MAPPING_START,block
 SCALAR,plain foo
 SCALAR,plain bar
-MAPPING_END
+MAPPING_END,block
 
 === Multiple Pair Block Mapping
 --- yaml
@@ -13,22 +13,22 @@ foo: blue
 bar: arrr
 baz: jazz
 --- events
-MAPPING_START
+MAPPING_START,block
 SCALAR,plain foo
 SCALAR,plain blue
 SCALAR,plain bar
 SCALAR,plain arrr
 SCALAR,plain baz
 SCALAR,plain jazz
-MAPPING_END
+MAPPING_END,block
 
 === Flow Mapping
 --- yaml
 {foo: you, bar: far}
 --- events
-MAPPING_START
+MAPPING_START,flow
 SCALAR,plain foo
 SCALAR,plain you
 SCALAR,plain bar
 SCALAR,plain far
-MAPPING_END
+MAPPING_END,flow

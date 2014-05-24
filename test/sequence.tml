@@ -2,9 +2,9 @@
 --- yaml
 - foo
 --- events
-SEQUENCE_START
+SEQUENCE_START,block
 SCALAR,plain foo
-SEQUENCE_END
+SEQUENCE_END,block
 
 === Multiple Entry Block Sequence
 --- yaml
@@ -12,18 +12,18 @@ SEQUENCE_END
 - bar
 - 42
 --- events
-SEQUENCE_START
+SEQUENCE_START,block
 SCALAR,plain foo
 SCALAR,plain bar
 SCALAR,plain 42
-SEQUENCE_END
+SEQUENCE_END,block
 
 === Flow Sequence
 --- yaml
 [foo, bar, 42]
 --- events
-SEQUENCE_START
+SEQUENCE_START,flow
 SCALAR,plain foo
 SCALAR,plain bar
 SCALAR,plain 42
-SEQUENCE_END
+SEQUENCE_END,flow

@@ -11,20 +11,23 @@ sub initial {
 sub final {
     my ($self, $got) = @_;
     if ($self->{kind}[0] eq 'mapping') {
-        $self->send('MAPPING_END');
+        $self->send('MAPPING_END', 'block');
     }
     elsif ($self->{kind}[0] eq 'sequence') {
-        $self->send('SEQUENCE_END');
+        $self->send('SEQUENCE_END', 'block');
     }
     join '', map { "$_\n" } @{$self->{events}};
 }
 
 sub send {
-    my ($self, $name, $value, $flag) = @_;
-    $flag ||= 0;
-    my $event = $name;
+    my ($self, $name, @args) = @_;
+    my $event;
     if ($name eq 'SCALAR') {
-        $event .= ",$flag $value"
+        my $value = shift(@args);
+        $event = join ' ', join(',', $name, @args), $value;
+    }
+    else {
+        $event = join(',', $name, @args);
     }
     push @{$self->{events}}, $event;
 }
