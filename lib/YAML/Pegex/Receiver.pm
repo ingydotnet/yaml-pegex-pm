@@ -30,7 +30,7 @@ sub final {
 }
 
 
-sub got_scalar {
+sub got_node_scalar {
     my ($self, $got) = @_;
     if ($self->{kind}[$self->{level}]) {
         $self->send(SCALAR => $got, 'plain')

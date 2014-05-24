@@ -1,21 +1,90 @@
-document:
-  | block-sequence
-  | block-mapping
-  | scalar
+# Notes:
+# indent / undent / ondent
 
-block-sequence: block-sequence-entry+
+# A YAML Stream is the top level rule, and accounts for the entirety of the
+# text being parsed. Basically, a stream is a set of zero or more documents,
+# but there can be ignorable comments on either side of an explicitly marked
+# document. NOTE: Not yet dealing with directives.
+yaml-stream:
+ignore-line*
+(
+  yaml-document
+  ignore-line*
+)*
+
+# A YAML Document is a single node of any kind. It may start with an optional
+# explicit head marker, and may be terminated with an optional explicit foot
+# marker.
+yaml-document:
+  document-head?
+  yaml-node
+  # It is important to make sure we are on a line boundary here:
+  # ignore-text /(: EOL | EOS )/
+  document-foot?
+
+document-head: / '---' (: SPACE+ | (?= EOL)) /
+
+document-foot: / '...' EOL /
+
+node-prefix:
+  | node-anchor (SPACE+ node-tag)?
+  | node-tag (SPACE+ node-anchor)?
+
+node-tag: / BANG BANG? ( WORD+ ) /
+
+node-anchor: / AMP ( WORD+ ) /
+
+node-alias: / AMP ( WORD+ ) /
+
+yaml-node:
+  node-prefix? (
+    | flow-mapping
+    | flow-sequence
+    | block-mapping
+    | block-sequence
+    | node-scalar
+    | node-alias
+  )
+
+flow-mapping: /- '{' -/
+
+flow-sequence: /- '[' -/
+
+block-sequence:
+  block-sequence-entry+
 
 block-sequence-entry:
-  / DASH SPACE+ scalar EOL /
+  / DASH SPACE+ node-scalar EOL /
 
-block-mapping: key-value-pair+ %% EOL
+block-mapping:
+  block-indent
+  block-mapping-pair+ % ignore-line
+  (EOL block-undent)
 
-key-value-pair: key mapping-separator value
+block-mapping-pair:
+  block-ondent
+  block-key
+  mapping-separator
+  block-value
 
-key: scalar
+block-indent: //
 
-value: scalar
+block-ondent: //
 
-scalar: /([^: CR NL]+)/
+block-undent: //
+
+block-key: node-scalar
+
+block-value: node-scalar
+
+node-scalar: /([^: CR NL]+)/
 
 mapping-separator: / COLON SPACE+ /
+
+ignore-line: / ignore-text EOL /
+
+ignore-text: / (: blank-text | comment-text ) /
+
+blank-text: / BLANK* /
+
+comment-text: / HASH ANY* /
