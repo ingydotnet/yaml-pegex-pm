@@ -13,7 +13,7 @@ sub setup {
     my ($self) = @_;
     $self->{stack} = [];
     $self->{kind} = [];
-    $self->{level} = 0;
+    $self->{level} = -1;
 }
 
 sub final {
@@ -29,6 +29,37 @@ sub final {
     return $self->data;
 }
 
+sub got_flow_mapping_start {
+    my ($self, $got) = @_;
+    $self->send('MAPPING_START');
+    my $level = ++$self->{level};
+    $self->{kind}[$self->{$level}] = 'mapping';
+    return;
+}
+
+sub got_flow_mapping_end {
+    my ($self, $got) = @_;
+    $self->send('MAPPING_END');
+    $self->{level}--;
+    pop @{$self->{kind}};
+    return;
+}
+
+sub got_flow_sequence_start {
+    my ($self, $got) = @_;
+    $self->send('SEQUENCE_START');
+    my $level = ++$self->{level};
+    $self->{kind}[$self->{$level}] = 'sequence';
+    return;
+}
+
+sub got_flow_sequence_end {
+    my ($self, $got) = @_;
+    $self->send('SEQUENCE_END');
+    $self->{level}--;
+    pop @{$self->{kind}};
+    return;
+}
 
 sub got_block_scalar {
     my ($self, $got) = @_;
@@ -43,19 +74,15 @@ sub got_block_scalar {
 
 sub got_flow_scalar {
     my ($self, $got) = @_;
-    if ($self->{kind}[$self->{level}]) {
-        $self->send(SCALAR => $got, 'plain')
-    }
-    else {
-        push @{$self->{stack}}, [scalar => $got, 'plain'];
-    }
+    $self->send(SCALAR => $got, 'plain');
     return;
 }
 
 sub got_mapping_separator {
     my ($self, $got) = @_;
     if (not $self->{kind}[$self->{level}]) {
-        $self->{kind}[$self->{$self->{level}}] = 'mapping';
+        my $level = ++$self->{level};
+        $self->{kind}[$self->{$level}] = 'mapping';
         $self->send('MAPPING_START');
         my $key = pop @{$self->{stack}};
         shift @$key;
@@ -67,7 +94,8 @@ sub got_mapping_separator {
 sub got_block_sequence_entry {
     my ($self, $got) = @_;
     if (not $self->{kind}[$self->{level}]) {
-        $self->{kind}[$self->{$self->{level}}] = 'sequence';
+        my $level = ++$self->{level};
+        $self->{kind}[$self->{$level}] = 'sequence';
         $self->send('SEQUENCE_START');
     }
     $self->send(SCALAR => $got, 'plain');

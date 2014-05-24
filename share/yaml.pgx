@@ -129,16 +129,16 @@ flow-node:
 # A flow sequence is zero or more nodes, separated by commas, inside square
 # brackets. A trailing comma is allowed.
 flow-sequence:
-  /- '[' -/
+  flow-sequence-start
   flow-sequence-entry* %% list-separator
-  /- ']' -/
+  flow-sequence-end
 
 # A flow mapping is key / value pairs, separated by commas, inside curly
 # braces. A trailing comma is allowed.
 flow-mapping:
-  /- '{' -/
+  flow-mapping-start
   flow-mapping-pair* %% list-separator
-  /- '}' -/
+  flow-mapping-end
 
 # A flow scalar only has 3 basic forms:
 flow-scalar: /
@@ -150,7 +150,7 @@ flow-scalar: /
 
 # A flow sequence entry is any flow node. This rule is an alias, and can maybe
 # go away later, but leaving this way now for clarity.
-flow-sequence-entry: flow-node
+flow-sequence-entry: flow-scalar
 
 # A flow mapping can have any node as key or value, but they must also be in
 # flow syntax.
@@ -158,6 +158,12 @@ flow-mapping-pair:
   flow-node
   mapping-separator
   flow-node
+
+# Starting and ending rules for flow collections:
+flow-sequence-start: /- '[' -/
+flow-sequence-end: /- ']' -/
+flow-mapping-start: /- '{' -/
+flow-mapping-end: /- '}' -/
 
 #------------------------------------------------------------------------------
 # Scalar Constructs

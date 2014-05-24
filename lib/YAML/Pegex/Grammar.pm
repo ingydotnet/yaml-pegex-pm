@@ -126,7 +126,7 @@ sub make_tree {
     'flow_mapping' => {
       '.all' => [
         {
-          '.rgx' => qr/\G\s*\{\s*/
+          '.ref' => 'flow_mapping_start'
         },
         {
           '+max' => 1,
@@ -153,9 +153,12 @@ sub make_tree {
           ]
         },
         {
-          '.rgx' => qr/\G\s*\}\s*/
+          '.ref' => 'flow_mapping_end'
         }
       ]
+    },
+    'flow_mapping_end' => {
+      '.rgx' => qr/\G\s*\}\s*/
     },
     'flow_mapping_pair' => {
       '.all' => [
@@ -169,6 +172,9 @@ sub make_tree {
           '.ref' => 'flow_node'
         }
       ]
+    },
+    'flow_mapping_start' => {
+      '.rgx' => qr/\G\s*\{\s*/
     },
     'flow_node' => {
       '.any' => [
@@ -189,7 +195,7 @@ sub make_tree {
     'flow_sequence' => {
       '.all' => [
         {
-          '.rgx' => qr/\G\s*\[\s*/
+          '.ref' => 'flow_sequence_start'
         },
         {
           '+max' => 1,
@@ -216,12 +222,18 @@ sub make_tree {
           ]
         },
         {
-          '.rgx' => qr/\G\s*\]\s*/
+          '.ref' => 'flow_sequence_end'
         }
       ]
     },
+    'flow_sequence_end' => {
+      '.rgx' => qr/\G\s*\]\s*/
+    },
     'flow_sequence_entry' => {
-      '.ref' => 'flow_node'
+      '.ref' => 'flow_scalar'
+    },
+    'flow_sequence_start' => {
+      '.rgx' => qr/\G\s*\[\s*/
     },
     'ignore_line' => {
       '.rgx' => qr/\G(?:[\ \t]*|\#.*)\r?\n/
