@@ -1,5 +1,6 @@
 use strict;
 package YAML::Pegex::Receiver::Test;
+
 use base 'YAML::Pegex::Receiver';
 
 sub initial {

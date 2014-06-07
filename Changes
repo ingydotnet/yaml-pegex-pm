@@ -1,4 +1,9 @@
 ---
+version: 0.0.4
+date:    Sat Jun  7 08:52:40 PDT 2014
+changes:
+- Fix abstract
+---
 version: 0.0.3
 date:    Fri May 23 12:59:56 PDT 2014
 changes:

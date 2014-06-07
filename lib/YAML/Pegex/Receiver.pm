@@ -1,5 +1,6 @@
 use strict;
 package YAML::Pegex::Receiver;
+
 use base 'Pegex::Tree';
 
 sub initial {

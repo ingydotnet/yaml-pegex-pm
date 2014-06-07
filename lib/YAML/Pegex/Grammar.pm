@@ -1,4 +1,5 @@
 package YAML::Pegex::Grammar;
+
 use base 'Pegex::Grammar';
 
 use constant file => 'share/yaml.pgx';
