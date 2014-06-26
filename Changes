@@ -1,4 +1,11 @@
 ---
+version: 0.0.5
+date:    Thu Jun 26 15:01:01 PDT 2014
+changes:
+- Remove grammar from share for now
+- Kwim to swim
+- Other new zild stuff
+---
 version: 0.0.4
 date:    Sat Jun  7 08:52:40 PDT 2014
 changes:

@@ -2,7 +2,7 @@ package YAML::Pegex::Grammar;
 
 use base 'Pegex::Grammar';
 
-use constant file => 'share/yaml.pgx';
+use constant file => '../yaml-pgx/yaml.pgx';
 
 sub make_tree {
   {

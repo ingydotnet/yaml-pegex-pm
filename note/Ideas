@@ -1,0 +1,16 @@
+== YAML Ideas
+
+- Make YAML version be semver
+
+  Release 1.2.1 etc.
+
+- Contact people
+  - Book email guy
+  - Pragmatic
+  - cce
+  - obk
+  - brian aker
+
+- Split grammar into yaml-pgx repo
+
+- Create a yaml-tml repo
