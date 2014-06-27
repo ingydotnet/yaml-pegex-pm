@@ -12,6 +12,7 @@ install:
 - cpanm --quiet --notest
   Devel::Cover::Report::Coveralls
   Pegex
+  TestML
   YAML::XS
 
 script:
@@ -22,6 +23,12 @@ script:
 after_success:
 - cover -report coveralls
 
+notifications:
+  irc:
+    channels:
+    - irc.freenode.net#pegex
+    on_success: change
+    on_failure: always
 
 # Hack to not run on tag pushes:
 branches:
