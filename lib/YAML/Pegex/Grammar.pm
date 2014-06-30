@@ -11,19 +11,16 @@ sub rule_block_indent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indents = $self->{indent};
     pos($$buffer) = $pos;
-    if (not @$indents) {
-        return if $pos >= length($$buffer);
-        if ($pos > 0 and substr($$buffer, $pos - 1) !~ /\n/) {
-            $parser->throw_error("Starting indentation error");
-        }
-        $$buffer =~ /\G( *)/g or die;
+    return if $pos >= length($$buffer);
+    if ($pos == 0) {
+        $$buffer =~ /\G( *)(?=[^\s\#])/g or die;
         push @$indents, length($1);
-        return $parser->match_rule(pos($$buffer));
+        return $parser->match_rule($pos);
     }
-    my $len = $indents->[-1] + 1;
+    my $len = @$indents ? $indents->[-1] + 1 : 0;
     $$buffer =~ /\G\r?\n( {$len,})(?=[^\s\#])/g or return;
     push @$indents, length($1);
-    return $parser->match_rule(pos($$buffer));
+    return $parser->match_rule($pos);
 }
 
 sub rule_block_ondent {
@@ -33,7 +30,6 @@ sub rule_block_ondent {
     my $re = $pos > 0 ? '\r?\n' : '';
     pos($$buffer) = $pos;
     $$buffer =~ /\G$re( {$len})(?=[^\s\#])/g or return;
-    push @$indents, length($1);
     return $parser->match_rule(pos($$buffer));
 }
 
@@ -114,15 +110,31 @@ sub make_tree {
           '.ref' => 'block_key'
         },
         {
-          '.ref' => 'mapping_separator'
+          '.ref' => 'block_mapping_separator'
         },
         {
           '.ref' => 'block_value'
         }
       ]
     },
+    'block_mapping_separator' => {
+      '.rgx' => qr/\G:(?:\ +|\ *(?=\r?\n))/
+    },
+    'block_node' => {
+      '.any' => [
+        {
+          '.ref' => 'block_sequence'
+        },
+        {
+          '.ref' => 'block_mapping'
+        },
+        {
+          '.ref' => 'block_scalar'
+        }
+      ]
+    },
     'block_scalar' => {
-      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\ |\r?\n|\z))/
+      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))/
     },
     'block_sequence' => {
       '.all' => [
@@ -148,15 +160,18 @@ sub make_tree {
       ]
     },
     'block_sequence_entry' => {
-      '.rgx' => qr/\G\-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\ |\r?\n|\z))\r?\n/
+      '.rgx' => qr/\G\-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))\r?\n/
     },
     'block_value' => {
       '.any' => [
         {
-          '.ref' => 'block_scalar'
+          '.ref' => 'flow_mapping'
         },
         {
-          '.ref' => 'flow_node'
+          '.ref' => 'flow_sequence'
+        },
+        {
+          '.ref' => 'block_node'
         }
       ]
     },
@@ -209,12 +224,15 @@ sub make_tree {
           '.ref' => 'flow_node'
         },
         {
-          '.ref' => 'mapping_separator'
+          '.ref' => 'flow_mapping_separator'
         },
         {
           '.ref' => 'flow_node'
         }
       ]
+    },
+    'flow_mapping_separator' => {
+      '.rgx' => qr/\G:(?:\ +|\ *(?=\r?\n))/
     },
     'flow_mapping_start' => {
       '.rgx' => qr/\G\s*\{\s*/
@@ -283,9 +301,6 @@ sub make_tree {
     },
     'list_separator' => {
       '.rgx' => qr/\G,\ +/
-    },
-    'mapping_separator' => {
-      '.rgx' => qr/\G:\ +/
     },
     'node_alias' => {
       '.rgx' => qr/\G\*(\w+)/

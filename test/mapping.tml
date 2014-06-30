@@ -34,7 +34,6 @@ SCALAR,plain far
 MAPPING_END,flow
 
 === Block Submapping
---- SKIP
 --- yaml
 foo:
   bar: 1
