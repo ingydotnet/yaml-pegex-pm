@@ -73,23 +73,8 @@ sub make_tree {
           '.ref' => 'block_indent'
         },
         {
-          '.all' => [
-            {
-              '.ref' => 'block_mapping_pair'
-            },
-            {
-              '+min' => 0,
-              '-flat' => 1,
-              '.all' => [
-                {
-                  '.ref' => 'ignore_line'
-                },
-                {
-                  '.ref' => 'block_mapping_pair'
-                }
-              ]
-            }
-          ]
+          '+min' => 1,
+          '.ref' => 'block_mapping_pair'
         },
         {
           '.ref' => 'block_undent'
