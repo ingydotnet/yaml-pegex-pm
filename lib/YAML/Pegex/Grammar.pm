@@ -1,22 +1,77 @@
+use strict; use warnings;
 package YAML::Pegex::Grammar;
-
-use base 'Pegex::Grammar';
+use Pegex::Base;
+extends 'Pegex::Grammar';
 
 use constant file => '../yaml-pgx/yaml.pgx';
 
+has indent => [];
+
+sub rule_block_indent {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indents = $self->{indent};
+    pos($$buffer) = $pos;
+    if (not @$indents) {
+        return if $pos >= length($$buffer);
+        if ($pos > 0 and substr($$buffer, $pos - 1) !~ /\n/) {
+            $parser->throw_error("Starting indentation error");
+        }
+        $$buffer =~ /\G( *)/g or die;
+        push @$indents, length($1);
+        return $parser->match_rule(pos($$buffer));
+    }
+    my $len = $indents->[-1] + 1;
+    $$buffer =~ /\G\r?\n( {$len,})(?=[^\s\#])/g or return;
+    push @$indents, length($1);
+    return $parser->match_rule(pos($$buffer));
+}
+
+sub rule_block_ondent {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indents = $self->{indent};
+    my $len = $indents->[-1];
+    my $re = $pos > 0 ? '\r?\n' : '';
+    pos($$buffer) = $pos;
+    $$buffer =~ /\G$re( {$len})(?=[^\s\#])/g or return;
+    push @$indents, length($1);
+    return $parser->match_rule(pos($$buffer));
+}
+
+sub rule_block_undent {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indents = $self->{indent};
+    my $count = 0;
+    while (@$indents) {
+        my $len = $indents->[-1];
+        pos($$buffer) = $pos;
+        if ($$buffer =~ /\G((?:\r?\n)?)\z/) {
+            $pos += length($1);
+        }
+        elsif ($$buffer =~ /\G\r?\n( {$len})(?=[^\s\#])/g) {
+            last;
+        }
+        $count++;
+        $parser->match_rule($pos);
+        pop @$indents;
+    }
+    return [] if $count;
+    return;
+}
+
+# sub make_tree {
+#     use Pegex::Bootstrap;
+#     use IO::All;
+#     my $grammar = io->file(file)->all;
+#     Pegex::Bootstrap->new->compile($grammar)->tree;
+# }
+# sub make_treeXXX {
 sub make_tree {
   {
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
     '+version' => '0.0.1',
-    'EOL' => {
-      '.rgx' => qr/\G\r?\n/
-    },
     'SPACE' => {
       '.rgx' => qr/\G\ /
-    },
-    'block_indent' => {
-      '.rgx' => qr/\G/
     },
     'block_key' => {
       '.ref' => 'block_scalar'
@@ -46,14 +101,7 @@ sub make_tree {
           ]
         },
         {
-          '.all' => [
-            {
-              '.ref' => 'EOL'
-            },
-            {
-              '.ref' => 'block_undent'
-            }
-          ]
+          '.ref' => 'block_undent'
         }
       ]
     },
@@ -72,9 +120,6 @@ sub make_tree {
           '.ref' => 'block_value'
         }
       ]
-    },
-    'block_ondent' => {
-      '.rgx' => qr/\G/
     },
     'block_scalar' => {
       '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\ |\r?\n|\z))/
@@ -104,9 +149,6 @@ sub make_tree {
     },
     'block_sequence_entry' => {
       '.rgx' => qr/\G\-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\ |\r?\n|\z))\r?\n/
-    },
-    'block_undent' => {
-      '.rgx' => qr/\G/
     },
     'block_value' => {
       '.any' => [
@@ -237,7 +279,7 @@ sub make_tree {
       '.rgx' => qr/\G\s*\[\s*/
     },
     'ignore_line' => {
-      '.rgx' => qr/\G(?:[\ \t]*|\#.*)\r?\n/
+      '.rgx' => qr/\G(?:\#.*|[\ \t]*)(?=\r?\n)/
     },
     'list_separator' => {
       '.rgx' => qr/\G,\ +/

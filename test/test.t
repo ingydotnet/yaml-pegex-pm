@@ -24,7 +24,7 @@ sub parse {
     $yaml = $yaml->{value};
     my $parser = Pegex::Parser->new(
         grammar => 'YAML::Pegex::Grammar'->new,
-        receiver => "YAML::Pegex::Receiver::Test"->new,
+        receiver => 'YAML::Pegex::Receiver::Test'->new,
         # debug => 1,
     );
     # use XXX; XXX($parser->grammar->tree);

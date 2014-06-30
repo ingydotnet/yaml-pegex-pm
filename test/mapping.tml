@@ -32,3 +32,21 @@ SCALAR,plain you
 SCALAR,plain bar
 SCALAR,plain far
 MAPPING_END,flow
+
+=== Block Submapping
+--- SKIP
+--- yaml
+foo:
+  bar: 1
+baz: 2
+--- events
+MAPPING_START,block
+SCALAR,plain foo
+MAPPING_START,block
+SCALAR,plain bar
+SCALAR,plain 1
+MAPPING_END,block
+SCALAR,plain baz
+SCALAR,plain 2
+MAPPING_END,block
+
