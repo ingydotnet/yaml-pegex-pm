@@ -1,0 +1,13 @@
+=== Simple Map Indent
+--- yaml
+foo:
+  bar: baz
+--- events
+MAPPING_START,block
+SCALAR,plain foo
+MAPPING_START,block
+SCALAR,plain bar
+SCALAR,plain baz
+MAPPING_END,block
+MAPPING_END,block
+

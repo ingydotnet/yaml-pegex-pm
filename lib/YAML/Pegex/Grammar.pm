@@ -36,22 +36,17 @@ sub rule_block_ondent {
 sub rule_block_undent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indents = $self->{indent};
-    my $count = 0;
-    while (@$indents) {
-        my $len = $indents->[-1];
-        pos($$buffer) = $pos;
-        if ($$buffer =~ /\G((?:\r?\n)?)\z/) {
-            $pos += length($1);
-        }
-        elsif ($$buffer =~ /\G\r?\n( {$len})(?=[^\s\#])/g) {
-            last;
-        }
-        $count++;
-        $parser->match_rule($pos);
-        pop @$indents;
+    return unless @$indents;
+    my $len = $indents->[-1];
+    pos($$buffer) = $pos;
+    if ($$buffer =~ /\G((?:\r?\n)?)\z/) {
+        $pos += length($1);
     }
-    return [] if $count;
-    return;
+    elsif ($$buffer =~ /\G\r?\n( {$len})/g) {
+        return;
+    }
+    pop @$indents;
+    return $parser->match_rule($pos);
 }
 
 # sub make_tree {

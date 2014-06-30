@@ -19,7 +19,6 @@ use YAML::Pegex::Receiver::Test;
 
 sub parse {
     my ($self, $yaml) = @_;
-    # local $ENV{PERL_PEGEX_DEBUG} = 1;
     $YAML::DumpCode = 1;
     $yaml = $yaml->{value};
     my $parser = Pegex::Parser->new(
@@ -42,3 +41,4 @@ Label = 'YAML to Events - $BlockLabel'
 
 %Include mapping.tml
 %Include sequence.tml
+%Include indent.tml
