@@ -11,20 +11,8 @@ SCALAR,plain baz
 MAPPING_END,block
 MAPPING_END,block
 
-=== Simple Map Indent
---- SKIP
+=== Bad indent
 --- yaml
-a:
-  b:
-     c: d
-  e: f
-   g: h
---- events
-MAPPING_START,block
-SCALAR,plain foo
-MAPPING_START,block
-SCALAR,plain bar
-SCALAR,plain baz
-MAPPING_END,block
-MAPPING_END,block
-
+a: b
+ c: d
+--- error

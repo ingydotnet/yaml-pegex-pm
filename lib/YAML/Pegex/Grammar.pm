@@ -39,14 +39,13 @@ sub rule_block_undent {
     return unless @$indents;
     my $len = $indents->[-1];
     pos($$buffer) = $pos;
-    if ($$buffer =~ /\G((?:\r?\n)?)\z/) {
-        $pos += length($1);
+    if ($$buffer =~ /\G((?:\r?\n)?)\z/ or
+        $$buffer !~ /\G\r?\n( {$len})/g
+    ) {
+        pop @$indents;
+        return $parser->match_rule($pos);
     }
-    elsif ($$buffer =~ /\G\r?\n( {$len})/g) {
-        return;
-    }
-    pop @$indents;
-    return $parser->match_rule($pos);
+    return;
 }
 
 # sub make_tree {
@@ -61,6 +60,12 @@ sub make_tree {
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
     '+version' => '0.0.1',
+    'EOL' => {
+      '.rgx' => qr/\G\r?\n/
+    },
+    'EOS' => {
+      '.rgx' => qr/\G\z/
+    },
     'SPACE' => {
       '.rgx' => qr/\G\ /
     },
@@ -117,27 +122,8 @@ sub make_tree {
       '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))/
     },
     'block_sequence' => {
-      '.all' => [
-        {
-          '.ref' => 'block_sequence_entry'
-        },
-        {
-          '+min' => 0,
-          '-flat' => 1,
-          '.all' => [
-            {
-              '.ref' => 'list_separator'
-            },
-            {
-              '.ref' => 'block_sequence_entry'
-            }
-          ]
-        },
-        {
-          '+max' => 1,
-          '.ref' => 'list_separator'
-        }
-      ]
+      '+min' => 1,
+      '.ref' => 'block_sequence_entry'
     },
     'block_sequence_entry' => {
       '.rgx' => qr/\G\-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))\r?\n/
@@ -358,6 +344,17 @@ sub make_tree {
             },
             {
               '.ref' => 'block_scalar'
+            }
+          ]
+        },
+        {
+          '.all' => [
+            {
+              '+max' => 1,
+              '.ref' => 'EOL'
+            },
+            {
+              '.ref' => 'EOS'
             }
           ]
         }

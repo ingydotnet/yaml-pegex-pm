@@ -25,6 +25,7 @@ sub parse {
         grammar => 'YAML::Pegex::Grammar'->new,
         receiver => 'YAML::Pegex::Receiver::Test'->new,
         # debug => 1,
+        # maxparse => 70,
     );
     # use XXX; XXX($parser->grammar->tree);
     str $parser->parse($yaml);
