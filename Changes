@@ -1,4 +1,9 @@
 ---
+version: 0.0.6
+date:    Tue Jul  1 10:16:27 PDT 2014
+changes:
+- Support indentation in YAML
+---
 version: 0.0.5
 date:    Thu Jun 26 15:01:01 PDT 2014
 changes:
