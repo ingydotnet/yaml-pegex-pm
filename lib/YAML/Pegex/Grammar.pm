@@ -39,7 +39,7 @@ sub rule_block_undent {
     return unless @$indents;
     my $len = $indents->[-1];
     pos($$buffer) = $pos;
-    if ($$buffer =~ /\G((?:\r?\n)?)\z/ or
+    if ($$buffer =~ /\G((?:\r?\n)?)(?=\z|\.\.\.\r?\n|\-\-\-\r?\n)/ or
         $$buffer !~ /\G\r?\n( {$len})/g
     ) {
         pop @$indents;
@@ -62,9 +62,6 @@ sub make_tree {
     '+version' => '0.0.1',
     'EOL' => {
       '.rgx' => qr/\G\r?\n/
-    },
-    'EOS' => {
-      '.rgx' => qr/\G\z/
     },
     'SPACE' => {
       '.rgx' => qr/\G\ /
@@ -348,15 +345,8 @@ sub make_tree {
           ]
         },
         {
-          '.all' => [
-            {
-              '+max' => 1,
-              '.ref' => 'EOL'
-            },
-            {
-              '.ref' => 'EOS'
-            }
-          ]
+          '+max' => 1,
+          '.ref' => 'EOL'
         }
       ]
     },

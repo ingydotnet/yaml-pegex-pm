@@ -48,11 +48,13 @@ sub got_block_sequence_entry {
 
 sub got_block_undent {
     my ($self, $got) = @_;
-    if ($self->{kind}[$self->{level}] eq 'mapping') {
-        $self->send('MAPPING_END', 'block');
-    }
-    elsif ($self->{kind}[$self->{level}] eq 'sequence') {
-        $self->send('SEQUENCE_END', 'block');
+    if ($self->{kind}[$self->{level}]) {
+        if ($self->{kind}[$self->{level}] eq 'mapping') {
+            $self->send('MAPPING_END', 'block');
+        }
+        elsif ($self->{kind}[$self->{level}] eq 'sequence') {
+            $self->send('SEQUENCE_END', 'block');
+        }
     }
     $self->{level}--;
     pop @{$self->{kind}};

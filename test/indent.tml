@@ -11,8 +11,13 @@ SCALAR,plain baz
 MAPPING_END,block
 MAPPING_END,block
 
-=== Bad indent
+=== Footer
+--- SKIP
 --- yaml
 a: b
- c: d
---- error
+...
+--- events
+MAPPING_START,block
+SCALAR,plain a
+SCALAR,plain b
+MAPPING_END,block

@@ -1,7 +1,7 @@
 use strict;
 package YAML::Pegex::Receiver::Test;
-
-use base 'YAML::Pegex::Receiver';
+use Pegex::Base;
+extends 'YAML::Pegex::Receiver';
 
 sub initial {
     my ($self) = (shift);
@@ -11,12 +11,12 @@ sub initial {
 
 sub final {
     my ($self, $got) = @_;
-    if ($self->{kind}[0] eq 'mapping') {
-        $self->send('MAPPING_END', 'block');
-    }
-    elsif ($self->{kind}[0] eq 'sequence') {
+
+    # XXX This `if` goes away when sequence indent/undent works.
+    if ($self->{kind}[0] and $self->{kind}[0] eq 'sequence') {
         $self->send('SEQUENCE_END', 'block');
     }
+
     join '', map { "$_\n" } @{$self->{events}};
 }
 
