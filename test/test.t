@@ -43,3 +43,4 @@ Label = 'YAML to Events - $BlockLabel'
 %Include mapping.tml
 %Include sequence.tml
 %Include indent.tml
+%Include footer.tml

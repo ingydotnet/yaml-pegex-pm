@@ -1,4 +1,10 @@
 ---
+version: 0.0.7
+date:    Thu Jul  3 10:57:01 PDT 2014
+changes:
+- Support ... footer
+- Improve mapping support
+---
 version: 0.0.6
 date:    Tue Jul  1 10:16:27 PDT 2014
 changes:
