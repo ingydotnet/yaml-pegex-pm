@@ -1,4 +1,9 @@
 ---
+version: 0.0.8
+date:    Thu Jul  3 11:14:17 PDT 2014
+changes:
+- Add VERSION to Grammar, because Tiny::YAML needs it.
+---
 version: 0.0.7
 date:    Thu Jul  3 10:57:01 PDT 2014
 changes:
