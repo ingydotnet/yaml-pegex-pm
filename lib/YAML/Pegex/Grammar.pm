@@ -11,9 +11,9 @@ has indent => [];
 
 sub rule_block_indent {
     my ($self, $parser, $buffer, $pos) = @_;
+    return if $pos >= length($$buffer);
     my $indents = $self->{indent};
     pos($$buffer) = $pos;
-    return if $pos >= length($$buffer);
     if ($pos == 0) {
         $$buffer =~ /\G( *)(?=[^\s\#])/g or die;
         push @$indents, length($1);
