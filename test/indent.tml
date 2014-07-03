@@ -12,7 +12,6 @@ MAPPING_END,block
 MAPPING_END,block
 
 === Footer
---- SKIP
 --- yaml
 a: b
 ...

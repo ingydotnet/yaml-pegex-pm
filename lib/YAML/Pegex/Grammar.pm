@@ -67,7 +67,7 @@ sub make_tree {
       '.rgx' => qr/\G\ /
     },
     'block_key' => {
-      '.ref' => 'block_scalar'
+      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z)):(?:\ +|\ *(?=\r?\n))/
     },
     'block_mapping' => {
       '.all' => [
@@ -92,15 +92,9 @@ sub make_tree {
           '.ref' => 'block_key'
         },
         {
-          '.ref' => 'block_mapping_separator'
-        },
-        {
           '.ref' => 'block_value'
         }
       ]
-    },
-    'block_mapping_separator' => {
-      '.rgx' => qr/\G:(?:\ +|\ *(?=\r?\n))/
     },
     'block_node' => {
       '.any' => [

@@ -24,15 +24,15 @@ sub final {
     return $self->data;
 }
 
-sub got_block_mapping_separator {
+sub got_block_key {
     my ($self, $got) = @_;
     my $level = @{$self->parser->grammar->{indent}} - 1;
     $self->{level} = $level if $level > $self->{level};
     if (not $self->{kind}[$self->{level}]) {
         $self->{kind}[$self->{level}] = 'mapping';
         $self->send('MAPPING_START', 'block');
-        $self->send(@{pop @{$self->{stack}}});
     }
+    $self->send(SCALAR => $got, 'plain');
     return;
 }
 
@@ -63,14 +63,7 @@ sub got_block_undent {
 
 sub got_block_scalar {
     my ($self, $got) = @_;
-    my $level = @{$self->parser->grammar->{indent}} - 1;
-    $self->{level} = $level if $level > $self->{level};
-    if ($self->{level} > -1 and $self->{kind}[$self->{level}]) {
-        $self->send(SCALAR => $got, 'plain')
-    }
-    else {
-        push @{$self->{stack}}, [SCALAR => $got, 'plain'];
-    }
+    $self->send(SCALAR => $got, 'plain');
     return;
 }
 
