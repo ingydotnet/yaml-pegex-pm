@@ -1,4 +1,9 @@
 ---
+version: 0.0.9
+date:    Sun Jul  6 22:18:08 PDT 2014
+changes:
+- Add tests
+---
 version: 0.0.8
 date:    Thu Jul  3 11:14:17 PDT 2014
 changes:
