@@ -9,18 +9,24 @@ use constant file => '../yaml-pgx/yaml.pgx';
 
 has indent => [];
 
+my $EOL = qr/\r?\n/;
+my $EOD = qr/(?:$EOL)?(?=\z|\.\.\.\r?\n|\-\-\-\r?\n)/;
+my $SPACE = qr/ /;
+my $NONSPACE = qr/(?=[^\s\#])/;
+my $NOTHING = qr//;
+
 sub rule_block_indent {
     my ($self, $parser, $buffer, $pos) = @_;
     return if $pos >= length($$buffer);
     my $indents = $self->{indent};
     pos($$buffer) = $pos;
     if ($pos == 0) {
-        $$buffer =~ /\G( *)(?=[^\s\#])/g or die;
+        $$buffer =~ /\G($SPACE*)$NONSPACE/g or die;
         push @$indents, length($1);
         return $parser->match_rule($pos);
     }
     my $len = @$indents ? $indents->[-1] + 1 : 0;
-    $$buffer =~ /\G\r?\n( {$len,})(?=[^\s\#])/g or return;
+    $$buffer =~ /\G$EOL(${SPACE}{$len,})$NONSPACE/g or return;
     push @$indents, length($1);
     return $parser->match_rule($pos);
 }
@@ -29,9 +35,9 @@ sub rule_block_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indents = $self->{indent};
     my $len = $indents->[-1];
-    my $re = $pos > 0 ? '\r?\n' : '';
+    my $RE = $pos > 0 ? $EOL : $NOTHING;
     pos($$buffer) = $pos;
-    $$buffer =~ /\G$re( {$len})(?=[^\s\#])/g or return;
+    $$buffer =~ /\G$RE(${SPACE}{$len})$NONSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
 }
 
@@ -41,9 +47,7 @@ sub rule_block_undent {
     return unless @$indents;
     my $len = $indents->[-1];
     pos($$buffer) = $pos;
-    if ($$buffer =~ /\G((?:\r?\n)?)(?=\z|\.\.\.\r?\n|\-\-\-\r?\n)/ or
-        $$buffer !~ /\G\r?\n( {$len})/g
-    ) {
+    if ($$buffer =~ /\G$EOD|(?!$EOL {$len})/g) {
         pop @$indents;
         return $parser->match_rule($pos);
     }

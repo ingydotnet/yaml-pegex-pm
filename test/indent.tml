@@ -11,3 +11,38 @@ SCALAR,plain baz
 MAPPING_END,block
 MAPPING_END,block
 
+=== Multi-Level Indent
+--- yaml
+a:
+  b:
+    c: d
+  e:
+    f: g
+h: i
+--- events
+MAPPING_START,block
+SCALAR,plain a
+MAPPING_START,block
+SCALAR,plain b
+MAPPING_START,block
+SCALAR,plain c
+SCALAR,plain d
+MAPPING_END,block
+SCALAR,plain e
+MAPPING_START,block
+SCALAR,plain f
+SCALAR,plain g
+MAPPING_END,block
+MAPPING_END,block
+SCALAR,plain h
+SCALAR,plain i
+MAPPING_END,block
+
+=== Array Indent
+--- SKIP
+--- yaml
+foo:
+- 42
+bar:
+  - 44
+--- events
