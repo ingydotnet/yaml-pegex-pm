@@ -35,7 +35,7 @@ __DATA__
 
 %TestML 0.1.0
 
-# Diff = 1
+Diff = 1
 
 Label = 'YAML to Events - $BlockLabel'
 *yaml.parse == *events
@@ -44,3 +44,4 @@ Label = 'YAML to Events - $BlockLabel'
 %Include sequence.tml
 %Include indent.tml
 %Include footer.tml
+%Include misc.tml
