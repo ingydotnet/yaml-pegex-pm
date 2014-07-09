@@ -12,7 +12,7 @@ YAML::Pegex - YAML Parser using Pegex
 
 =head1 SYNOPSIS
 
-      my $data = YAML::Pegex->new->parse($input);
+    my $data = YAML::Pegex->new->parse($input);
 
 =head1 DESCRIPTION
 

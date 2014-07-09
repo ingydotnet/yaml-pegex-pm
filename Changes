@@ -1,4 +1,9 @@
 ---
+version: 0.0.10
+date:    Tue Jul  8 23:39:06 PDT 2014
+changes:
+- Minor doc fix
+---
 version: 0.0.9
 date:    Sun Jul  6 22:18:08 PDT 2014
 changes:

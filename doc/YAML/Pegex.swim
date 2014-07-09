@@ -5,7 +5,7 @@ YAML Parser using Pegex
 
 = Synopsis
 
-    my $data = YAML::Pegex->new->parse($input);
+  my $data = YAML::Pegex->new->parse($input);
 
 = Description
 
