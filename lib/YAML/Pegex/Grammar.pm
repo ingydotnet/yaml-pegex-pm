@@ -1,6 +1,6 @@
 use strict; use warnings;
 package YAML::Pegex::Grammar;
-our $VERSION = '0.0.11';
+our $VERSION = '0.0.12';
 
 use Pegex::Base;
 extends 'Pegex::Grammar';
