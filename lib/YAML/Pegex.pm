@@ -1,2 +1,2 @@
 package YAML::Pegex;
-our $VERSION = '0.0.12';
+our $VERSION = '0.0.13';

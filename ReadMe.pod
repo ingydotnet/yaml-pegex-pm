@@ -10,6 +10,10 @@ See http://github.com/ingydotnet/swim-pm#readme
 
 YAML::Pegex - YAML Parser using Pegex
 
+=for html
+<a href="https://travis-ci.org/ingydotnet/yaml-pegex-pm"><img src="https://travis-ci.org/ingydotnet/yaml-pegex-pm.png" alt="yaml-pegex-pm"></a>
+<a href="https://coveralls.io/r/ingydotnet/yaml-pegex-pm?branch=master"><img src="https://coveralls.io/repos/ingydotnet/yaml-pegex-pm/badge.png" alt="yaml-pegex-pm"></a>
+
 =head1 SYNOPSIS
 
     my $data = YAML::Pegex->new->parse($input);

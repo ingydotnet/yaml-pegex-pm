@@ -3,6 +3,8 @@ YAML::Pegex
 
 YAML Parser using Pegex
 
+<badge travis coveralls ingydotnet/yaml-pegex-pm>
+
 = Synopsis
 
   my $data = YAML::Pegex->new->parse($input);
