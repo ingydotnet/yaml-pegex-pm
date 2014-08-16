@@ -1,7 +1,7 @@
 =meta: 0.0.2
 
 name: YAML-Pegex
-version: 0.0.15
+version: 0.0.16
 abstract: YAML Parser in Pegex
 homepage:
 - http://yaml.org
@@ -29,8 +29,3 @@ requires:
 
 =zild:
   include_testml: 1
-
-=travis:
-  test:
-    requires:
-      TestML: 0
