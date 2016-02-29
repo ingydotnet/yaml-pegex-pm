@@ -1,18 +1,18 @@
 === Single Pair Block Mapping
---- in-yaml
++++ in-yaml
 foo: bar
---- test-event
++++ test-event
 +MAP
 =VAL :foo
 =VAL :bar
 -MAP
 
 === Multiple Pair Block Mapping
---- in-yaml
++++ in-yaml
 foo: blue
 bar: arrr
 baz: jazz
---- test-event
++++ test-event
 +MAP
 =VAL :foo
 =VAL :blue
@@ -23,9 +23,9 @@ baz: jazz
 -MAP
 
 === Flow Mapping
---- in-yaml
++++ in-yaml
 {foo: you, bar: far}
---- test-event
++++ test-event
 +MAP
 =VAL :foo
 =VAL :you
@@ -34,11 +34,11 @@ baz: jazz
 -MAP
 
 === Block Submapping
---- in-yaml
++++ in-yaml
 foo:
   bar: 1
 baz: 2
---- test-event
++++ test-event
 +MAP
 =VAL :foo
 +MAP

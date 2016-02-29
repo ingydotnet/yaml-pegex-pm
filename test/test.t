@@ -4,6 +4,7 @@ use lib '../testml-pm/lib';
 
 use TestML;
 use TestML::Compiler::Lite;
+$TestML::Compiler::Lite::point_marker = '\+\+\+';
 
 TestML->new(
     testml => join('', <DATA>),

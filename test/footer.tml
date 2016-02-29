@@ -1,9 +1,9 @@
 === Footer
---- in-yaml
++++ in-yaml
 a: b
 ...
 
---- test-event
++++ test-event
 +MAP
 =VAL :a
 =VAL :b

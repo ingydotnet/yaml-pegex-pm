@@ -1,8 +1,8 @@
 === Simple Map Indent
---- in-yaml
++++ in-yaml
 foo:
   bar: baz
---- test-event
++++ test-event
 +MAP
 =VAL :foo
 +MAP
@@ -12,14 +12,14 @@ foo:
 -MAP
 
 === Multi-Level Indent
---- in-yaml
++++ in-yaml
 a:
   b:
     c: d
   e:
     f: g
 h: i
---- test-event
++++ test-event
 +MAP
 =VAL :a
 +MAP
@@ -39,10 +39,10 @@ h: i
 -MAP
 
 === Array Indent
---- SKIP
---- in-yaml
++++ SKIP
++++ in-yaml
 foo:
 - 42
 bar:
   - 44
---- test-event
++++ test-event
