@@ -61,7 +61,7 @@ sub rule_block_undent {
 #     Pegex::Bootstrap->new->compile($grammar)->tree;
 # }
 # sub make_treeXXX {
-sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.54)
+sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.60)
   {
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
@@ -73,7 +73,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.54)
       '.rgx' => qr/\G\ /
     },
     'block_key' => {
-      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))(?=:(?:\ +|\ *(?=\r?\n)))/
+      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z)):(?:\ +|\ *(?=\r?\n))/
     },
     'block_mapping' => {
       '.all' => [
@@ -98,15 +98,9 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.54)
           '.ref' => 'block_key'
         },
         {
-          '.ref' => 'block_mapping_separator'
-        },
-        {
           '.ref' => 'block_value'
         }
       ]
-    },
-    'block_mapping_separator' => {
-      '.rgx' => qr/\G:(?:\ +|\ *(?=\r?\n))/
     },
     'block_node' => {
       '.any' => [
