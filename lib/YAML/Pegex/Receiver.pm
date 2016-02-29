@@ -30,9 +30,9 @@ sub got_block_key {
     $self->{level} = $level if $level > $self->{level};
     if (not $self->{kind}[$self->{level}]) {
         $self->{kind}[$self->{level}] = 'mapping';
-        $self->send('MAPPING_START', 'block');
+        $self->send('MAPPING_START');
     }
-    $self->send(SCALAR => $got, 'plain');
+    $self->send(SCALAR => ":$got");
     return;
 }
 
@@ -40,9 +40,9 @@ sub got_block_sequence_entry {
     my ($self, $got) = @_;
     if (not $self->{kind}[$self->{level}]) {
         $self->{kind}[++$self->{level}] = 'sequence';
-        $self->send('SEQUENCE_START', 'block');
+        $self->send('SEQUENCE_START');
     }
-    $self->send(SCALAR => $got, 'plain');
+    $self->send(SCALAR => ":$got");
     return;
 }
 
@@ -50,10 +50,10 @@ sub got_block_undent {
     my ($self, $got) = @_;
     if ($self->{kind}[$self->{level}]) {
         if ($self->{kind}[$self->{level}] eq 'mapping') {
-            $self->send('MAPPING_END', 'block');
+            $self->send('MAPPING_END');
         }
         elsif ($self->{kind}[$self->{level}] eq 'sequence') {
-            $self->send('SEQUENCE_END', 'block');
+            $self->send('SEQUENCE_END');
         }
     }
     $self->{level}--;
@@ -63,20 +63,20 @@ sub got_block_undent {
 
 sub got_block_scalar {
     my ($self, $got) = @_;
-    $self->send(SCALAR => $got, 'plain');
+    $self->send(SCALAR => ":$got");
     return;
 }
 
 sub got_flow_mapping_start {
     my ($self, $got) = @_;
-    $self->send('MAPPING_START', 'flow');
+    $self->send('MAPPING_START');
     $self->{kind}[++$self->{level}] = 'mapping';
     return;
 }
 
 sub got_flow_mapping_end {
     my ($self, $got) = @_;
-    $self->send('MAPPING_END', 'flow');
+    $self->send('MAPPING_END');
     $self->{level}--;
     pop @{$self->{kind}};
     return;
@@ -84,14 +84,14 @@ sub got_flow_mapping_end {
 
 sub got_flow_sequence_start {
     my ($self, $got) = @_;
-    $self->send('SEQUENCE_START', 'flow');
+    $self->send('SEQUENCE_START');
     $self->{kind}[++$self->{level}] = 'sequence';
     return;
 }
 
 sub got_flow_sequence_end {
     my ($self, $got) = @_;
-    $self->send('SEQUENCE_END', 'flow');
+    $self->send('SEQUENCE_END');
     $self->{level}--;
     pop @{$self->{kind}};
     return;
@@ -99,7 +99,7 @@ sub got_flow_sequence_end {
 
 sub got_flow_scalar {
     my ($self, $got) = @_;
-    $self->send(SCALAR => $got, 'plain');
+    $self->send(SCALAR => ":$got");
     return;
 }
 

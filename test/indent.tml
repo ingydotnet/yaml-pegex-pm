@@ -1,48 +1,48 @@
 === Simple Map Indent
---- yaml
+--- in-yaml
 foo:
   bar: baz
---- events
-MAPPING_START,block
-SCALAR,plain foo
-MAPPING_START,block
-SCALAR,plain bar
-SCALAR,plain baz
-MAPPING_END,block
-MAPPING_END,block
+--- test-event
++MAP
+=VAL :foo
++MAP
+=VAL :bar
+=VAL :baz
+-MAP
+-MAP
 
 === Multi-Level Indent
---- yaml
+--- in-yaml
 a:
   b:
     c: d
   e:
     f: g
 h: i
---- events
-MAPPING_START,block
-SCALAR,plain a
-MAPPING_START,block
-SCALAR,plain b
-MAPPING_START,block
-SCALAR,plain c
-SCALAR,plain d
-MAPPING_END,block
-SCALAR,plain e
-MAPPING_START,block
-SCALAR,plain f
-SCALAR,plain g
-MAPPING_END,block
-MAPPING_END,block
-SCALAR,plain h
-SCALAR,plain i
-MAPPING_END,block
+--- test-event
++MAP
+=VAL :a
++MAP
+=VAL :b
++MAP
+=VAL :c
+=VAL :d
+-MAP
+=VAL :e
++MAP
+=VAL :f
+=VAL :g
+-MAP
+-MAP
+=VAL :h
+=VAL :i
+-MAP
 
 === Array Indent
 --- SKIP
---- yaml
+--- in-yaml
 foo:
 - 42
 bar:
   - 44
---- events
+--- test-event

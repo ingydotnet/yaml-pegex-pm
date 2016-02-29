@@ -1,10 +1,10 @@
 === Footer
---- yaml
+--- in-yaml
 a: b
 ...
---- events
-MAPPING_START,block
-SCALAR,plain a
-SCALAR,plain b
-MAPPING_END,block
 
+--- test-event
++MAP
+=VAL :a
+=VAL :b
+-MAP

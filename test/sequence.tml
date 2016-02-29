@@ -1,29 +1,29 @@
 === Single Entry Block Sequence
---- yaml
+--- in-yaml
 - foo
---- events
-SEQUENCE_START,block
-SCALAR,plain foo
-SEQUENCE_END,block
+--- test-event
++SEQ
+=VAL :foo
+-SEQ
 
 === Multiple Entry Block Sequence
---- yaml
+--- in-yaml
 - foo
 - bar
 - 42
---- events
-SEQUENCE_START,block
-SCALAR,plain foo
-SCALAR,plain bar
-SCALAR,plain 42
-SEQUENCE_END,block
+--- test-event
++SEQ
+=VAL :foo
+=VAL :bar
+=VAL :42
+-SEQ
 
 === Flow Sequence
---- yaml
+--- in-yaml
 [foo, bar, 42]
---- events
-SEQUENCE_START,flow
-SCALAR,plain foo
-SCALAR,plain bar
-SCALAR,plain 42
-SEQUENCE_END,flow
+--- test-event
++SEQ
+=VAL :foo
+=VAL :bar
+=VAL :42
+-SEQ

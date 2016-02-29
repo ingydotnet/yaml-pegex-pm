@@ -41,7 +41,7 @@ __DATA__
 Diff = 1
 
 Label = 'YAML to Events - $BlockLabel'
-*yaml.parse == *events
+*in-yaml.parse == *test-event
 
 %Include mapping.tml
 %Include sequence.tml

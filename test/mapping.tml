@@ -1,51 +1,50 @@
 === Single Pair Block Mapping
---- yaml
+--- in-yaml
 foo: bar
---- events
-MAPPING_START,block
-SCALAR,plain foo
-SCALAR,plain bar
-MAPPING_END,block
+--- test-event
++MAP
+=VAL :foo
+=VAL :bar
+-MAP
 
 === Multiple Pair Block Mapping
---- yaml
+--- in-yaml
 foo: blue
 bar: arrr
 baz: jazz
---- events
-MAPPING_START,block
-SCALAR,plain foo
-SCALAR,plain blue
-SCALAR,plain bar
-SCALAR,plain arrr
-SCALAR,plain baz
-SCALAR,plain jazz
-MAPPING_END,block
+--- test-event
++MAP
+=VAL :foo
+=VAL :blue
+=VAL :bar
+=VAL :arrr
+=VAL :baz
+=VAL :jazz
+-MAP
 
 === Flow Mapping
---- yaml
+--- in-yaml
 {foo: you, bar: far}
---- events
-MAPPING_START,flow
-SCALAR,plain foo
-SCALAR,plain you
-SCALAR,plain bar
-SCALAR,plain far
-MAPPING_END,flow
+--- test-event
++MAP
+=VAL :foo
+=VAL :you
+=VAL :bar
+=VAL :far
+-MAP
 
 === Block Submapping
---- yaml
+--- in-yaml
 foo:
   bar: 1
 baz: 2
---- events
-MAPPING_START,block
-SCALAR,plain foo
-MAPPING_START,block
-SCALAR,plain bar
-SCALAR,plain 1
-MAPPING_END,block
-SCALAR,plain baz
-SCALAR,plain 2
-MAPPING_END,block
-
+--- test-event
++MAP
+=VAL :foo
++MAP
+=VAL :bar
+=VAL :1
+-MAP
+=VAL :baz
+=VAL :2
+-MAP
