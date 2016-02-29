@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:ingydotnet/yaml-pgx
+	branch = master
+	commit = b9447d5996dc2c30c19e1e5e4514ae5766664074
+	parent = e4151439b5de257d6a108c0a7de4fc2f6a64de08
+	cmdver = 0.3.0
