@@ -44,8 +44,21 @@ Diff = 1
 Label = 'YAML to Events - $BlockLabel'
 *in-yaml.parse == *test-event
 
-%Include mapping.tml
-%Include sequence.tml
-%Include indent.tml
-%Include footer.tml
-%Include misc.tml
+# %Include yaml-dev-kit/test/name/blank-lines.tml
+%Include yaml-dev-kit/test/name/block-submapping.tml
+%Include yaml-dev-kit/test/name/document-with-footer.tml
+%Include yaml-dev-kit/test/name/empty-stream.tml
+# %Include yaml-dev-kit/test/name/example-3-23-various-explicit-tags.tml
+%Include yaml-dev-kit/test/name/flow-mapping.tml
+%Include yaml-dev-kit/test/name/flow-sequence.tml
+%Include yaml-dev-kit/test/name/multi-level-mapping-indent.tml
+%Include yaml-dev-kit/test/name/multiple-entry-block-sequence.tml
+%Include yaml-dev-kit/test/name/multiple-pair-block-mapping.tml
+# %Include yaml-dev-kit/test/name/sequence-indent.tml
+%Include yaml-dev-kit/test/name/simple-mapping-indent.tml
+%Include yaml-dev-kit/test/name/single-entry-block-sequence.tml
+%Include yaml-dev-kit/test/name/single-pair-block-mapping.tml
+%Include yaml-dev-kit/test/name/spec-example-2-1-sequence-of-scalars.tml
+# %Include yaml-dev-kit/test/name/spec-example-2-13-in-literals-newlines-are-preserved.tml
+# %Include yaml-dev-kit/test/name/spec-example-2-2-mapping-scalars-to-scalars.tml
+# %Include yaml-dev-kit/test/name/spec-example-2-3-mapping-scalars-to-sequences.tml
