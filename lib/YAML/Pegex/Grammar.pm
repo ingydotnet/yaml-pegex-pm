@@ -5,7 +5,7 @@ our $VERSION = '0.0.17';
 use Pegex::Base;
 extends 'Pegex::Grammar';
 
-use constant file => '../yaml-pgx/yaml.pgx';
+use constant file => './share/yaml-pgx/yaml.pgx';
 
 has indent => [];
 

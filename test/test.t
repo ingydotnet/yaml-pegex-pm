@@ -7,28 +7,31 @@ use TestML::Compiler::Lite;
 
 TestML->new(
     testml => join('', <DATA>),
-    bridge => 'main',
+    bridge => 'Bridge',
     compiler => 'TestML::Compiler::Lite',
 )->run;
 
-use base 'TestML::Bridge';
-use TestML::Util;
-use Pegex::Parser;
-use YAML::Pegex::Grammar;
-use YAML::Pegex::Receiver::Test;
+{
+    package Bridge;
+    use base 'TestML::Bridge';
+    use TestML::Util;
+    use Pegex::Parser;
+    use YAML::Pegex::Grammar;
+    use YAML::Pegex::Receiver::Test;
 
-sub parse {
-    my ($self, $yaml) = @_;
-    $YAML::DumpCode = 1;
-    $yaml = $yaml->{value};
-    my $parser = Pegex::Parser->new(
-        grammar => 'YAML::Pegex::Grammar'->new,
-        receiver => 'YAML::Pegex::Receiver::Test'->new,
-        # debug => 1,
-        # maxparse => 70,
-    );
-    # use XXX; XXX($parser->grammar->tree);
-    str $parser->parse($yaml);
+    sub parse {
+        my ($self, $yaml) = @_;
+        $YAML::DumpCode = 1;
+        $yaml = $yaml->{value};
+        my $parser = Pegex::Parser->new(
+            grammar => 'YAML::Pegex::Grammar'->new,
+            receiver => 'YAML::Pegex::Receiver::Test'->new,
+            # debug => 1,
+            # maxparse => 70,
+        );
+        # use XXX; XXX($parser->grammar->tree);
+        str $parser->parse($yaml);
+    }
 }
 
 __DATA__

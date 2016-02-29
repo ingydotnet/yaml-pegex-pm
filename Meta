@@ -8,7 +8,7 @@ homepage:
 - http://pegex.org
 language: perl
 license: perl
-copyright: 2014
+copyright: 2014-2016
 
 author:
   name: Ingy döt Net
