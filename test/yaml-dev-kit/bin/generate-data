@@ -27,6 +27,7 @@ sub parse_meta {
   my $meta = $self->{meta} = {};
   $$text =~ s/\A$re_label\n// or $self->parse_error;
   $meta->{label} = $1;
+  $meta->{label} =~ s/^\s*(.*?)\s*$/$1/;
   while ($$text !~ /\A$re_file\n/) {
     if ($$text =~ s/\A$re_meta\n//) {
       $meta->{$1} = $2;
@@ -68,13 +69,14 @@ sub process_file {
   }
 
   my $label = $self->{meta}{label};
-  $self->_link("data/$id/===", "$label");
+  $self->_write("data/$id/===", "$label\n");
+  $self->_link("data/meta/$id.label", "$label");
 
   $self->_write("data/$id/$file", $output);
 
   my $name = lc $label;
   $name =~ s/[^-\w]+/-/g;
-  $name =~ s/^-(.*?)-?$/$1/;
+  $name =~ s/^-?(.*?)-?$/$1/;
   $self->_link("data/name/$name", "../$id");
   $self->_link("test/name/$name.tml", "../$id.tml");
 

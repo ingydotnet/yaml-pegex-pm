@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:ingydotnet/yaml-dev-kit
 	branch = master
-	commit = 41e8b6d2f7c8d7c437305c328ebeb3556b963d75
-	parent = 738ea4fd303a7c888f2e731a2fbd612ef3d77bd2
+	commit = 81fb7157176ea27f77625b127d5bc9be066e1019
+	parent = b94d53148eeef992ea381c4321f550ee4ffda576
 	cmdver = 0.3.0
