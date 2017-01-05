@@ -1,0 +1,21 @@
+=== Multiline Scalar at Top Level
+from: NimYAML tests
+tags: scalar
+
++++ in-yaml
+a
+b  
+  c
+d
+
+e
+
++++ out-yaml
+# XXX This should emit as double quoted (opinion)
+# "a b c d\ne"
+'a b c d
+
+  e'
+
++++ test-event
+=VAL :a b c d\ne

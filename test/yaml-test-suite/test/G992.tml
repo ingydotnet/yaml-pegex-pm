@@ -1,0 +1,17 @@
+=== Spec Example 8.9. Folded Scalar
+from: http://www.yaml.org/spec/1.2/spec.html#id2796371
+tags: spec,block,scalar
+
++++ in-yaml
+>
+ folded
+ text
+
+\
+
++++ out-yaml
+>
+  folded text
+
++++ test-event
+=VAL >folded text\n
