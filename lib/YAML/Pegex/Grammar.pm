@@ -54,14 +54,14 @@ sub rule_block_undent {
     return;
 }
 
-# sub make_tree {
-#     use Pegex::Bootstrap;
-#     use IO::All;
-#     my $grammar = io->file(file)->all;
-#     Pegex::Bootstrap->new->compile($grammar)->tree;
-# }
-# sub make_treeXXX {
-sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.60)
+sub make_tree {
+    use Pegex::Bootstrap;
+    use IO::All;
+    my $grammar = io->file(file)->all;
+    Pegex::Bootstrap->new->compile($grammar)->tree;
+}
+sub make_treeXXX {
+# sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.60)
   {
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
