@@ -25,11 +25,13 @@ sub final {
     my ($self, $got) = @_;
 
     # XXX This `if` goes away when sequence indent/undent works.
-    if ($self->{kind}[0] and $self->{kind}[0] eq 'sequence') {
-        $self->send('SEQUENCE_END');
-    }
+    # if ($self->{kind}[0] and $self->{kind}[0] eq 'sequence') {
+    #     $self->send('SEQUENCE_END');
+    # }
 
-    join '', map { "$_\n" } @{$self->{events}};
+    my $result = join '', map { "$_\n" } @{$self->{events}};
+    $result = "+STR\n$result-STR\n" if $result eq '';
+    return $result;
 }
 
 sub send {
@@ -44,6 +46,7 @@ sub send {
         $event = join(' ', $name, @args);
     }
     push @{$self->{events}}, $event;
+    return;
 }
 
 1;

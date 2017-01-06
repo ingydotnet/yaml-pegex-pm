@@ -15,6 +15,7 @@ sub initial {
     $self->setup;
     $self->send('STREAM_START');
     $self->send('DOCUMENT_START');
+    return;
 }
 
 sub final {
@@ -36,13 +37,23 @@ sub got_block_key {
     return;
 }
 
+sub got_block_sequence_start {
+    my ($self) = (shift);
+    $self->send('SEQUENCE_START');
+    return;
+}
+
+sub got_block_sequence_end {
+    my ($self) = (shift);
+    $self->send('SEQUENCE_END');
+    return;
+}
+
 sub got_block_sequence_entry {
     my ($self, $got) = @_;
     if (not $self->{kind}[$self->{level}]) {
         $self->{kind}[++$self->{level}] = 'sequence';
-        $self->send('SEQUENCE_START');
     }
-    $self->send(SCALAR => ":$got");
     return;
 }
 
