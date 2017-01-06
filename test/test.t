@@ -27,21 +27,24 @@ TestML->new(
         my $parser = Pegex::Parser->new(
             grammar => 'YAML::Pegex::Grammar'->new,
             receiver => 'YAML::Pegex::Receiver::Test'->new,
-            # debug => 1,
-            # maxparse => 20,
+            debug => $main::DEBUG,
+            maxparse => $main::MAX,
         );
         # use XXX; XXX($parser->grammar->tree);
         str $parser->parse($yaml);
     }
 }
 
+BEGIN {
+    $main::MAX = 0;
+    $main::DEBUG = 0;
+}
 __DATA__
 
 %TestML 0.1.0
-
 Diff = 1
-
 Label = 'YAML to Events - $BlockLabel'
+
 *in-yaml.parse == *test-event
 
 # Working so far:
@@ -57,15 +60,19 @@ Label = 'YAML to Events - $BlockLabel'
 %Include yaml-test-suite/test/J5UC.tml
 %Include yaml-test-suite/test/K4SU.tml
 %Include yaml-test-suite/test/KMK3.tml
+%Include yaml-test-suite/test/PBJ2.tml
+%Include yaml-test-suite/test/RLU9.tml
+%Include yaml-test-suite/test/S4T7.tml
 %Include yaml-test-suite/test/SYW4.tml
 
+# Try next:
+# = Indentation seq of maps
+# %Include yaml-test-suite/test/229Q.tml
+
 # These were attempted but not working yet:
-# %Include yaml-test-suite/test/6JQW.tml
-# %Include yaml-test-suite/test/77H8.tml
-# %Include yaml-test-suite/test/H2RW.tml
-# *** %Include yaml-test-suite/test/PBJ2.tml
-# *** %Include yaml-test-suite/test/RLU9.tml
-# ... %Include yaml-test-suite/test/S4T7.tml
+# |  %Include yaml-test-suite/test/6JQW.tml
+# hangs  %Include yaml-test-suite/test/77H8.tml
+# hangs  %Include yaml-test-suite/test/H2RW.tml
 
 # tinita has these working in another parser:
 # %Include yaml-test-suite/test/2JQS.tml

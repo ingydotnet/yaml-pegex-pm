@@ -3,6 +3,8 @@ package YAML::Pegex::Receiver;
 use Pegex::Base;
 extends 'Pegex::Tree';
 
+has data => {};
+
 sub setup {
     my ($self) = @_;
     $self->{stack} = [];
@@ -14,15 +16,37 @@ sub initial {
     my ($self) = @_;
     $self->setup;
     $self->send('STREAM_START');
-    $self->send('DOCUMENT_START');
     return;
 }
 
 sub final {
     my ($self, $got) = @_;
-    $self->send('DOCUMENT_END');
     $self->send('STREAM_END');
     return $self->data;
+}
+
+sub got_document_head {
+    my ($self, $got) = @_;
+    $self->send('DOCUMENT_START', '---');
+    return;
+}
+
+sub got_document_start {
+    my ($self, $got) = @_;
+    $self->send('DOCUMENT_START');
+    return;
+}
+
+sub got_document_foot {
+    my ($self, $got) = @_;
+    $self->send('DOCUMENT_END', '...');
+    return;
+}
+
+sub got_document_end {
+    my ($self, $got) = @_;
+    $self->send('DOCUMENT_END');
+    return;
 }
 
 sub got_block_key {
@@ -37,23 +61,10 @@ sub got_block_key {
     return;
 }
 
-sub got_block_sequence_start {
+sub got_block_indent_sequence {
     my ($self) = (shift);
+    $self->{kind}[++$self->{level}] = 'sequence';
     $self->send('SEQUENCE_START');
-    return;
-}
-
-sub got_block_sequence_end {
-    my ($self) = (shift);
-    $self->send('SEQUENCE_END');
-    return;
-}
-
-sub got_block_sequence_entry {
-    my ($self, $got) = @_;
-    if (not $self->{kind}[$self->{level}]) {
-        $self->{kind}[++$self->{level}] = 'sequence';
-    }
     return;
 }
 

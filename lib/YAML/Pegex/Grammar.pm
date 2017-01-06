@@ -12,6 +12,8 @@ has indent => [];
 my $EOL = qr/\r?\n/;
 my $EOD = qr/(?:$EOL)?(?=\z|\.\.\.\r?\n|\-\-\-\r?\n)/;
 my $SPACE = qr/ /;
+my $DASH = qr/\-/;
+my $DASHSPACE = qr/(?=$DASH$SPACE)/;
 my $NONSPACE = qr/(?=[^\s\#])/;
 my $NOTHING = qr//;
 
@@ -31,6 +33,27 @@ sub rule_block_indent {
     return $parser->match_rule($pos);
 }
 
+sub rule_block_indent_sequence {
+    my ($self, $parser, $buffer, $pos) = @_;
+    return if $pos >= length($$buffer);
+    my $indents = $self->{indent};
+    pos($$buffer) = $pos;
+    if ($pos == 0) {
+        $$buffer =~ /\G($SPACE*)$DASHSPACE/g or return;
+        push @$indents, length($1);
+        return $parser->match_rule($pos);
+    }
+    my $len = 0;
+    if (@$indents) {
+        $len = $indents->[-1];
+        $len++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
+    }
+    # warn ">$len\n";
+    $$buffer =~ /\G$EOL(${SPACE}{$len,})$DASHSPACE/g or return;
+    push @$indents, length($1);
+    return $parser->match_rule($pos);
+}
+
 sub rule_block_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indents = $self->{indent};
@@ -38,6 +61,16 @@ sub rule_block_ondent {
     my $RE = $pos > 0 ? $EOL : $NOTHING;
     pos($$buffer) = $pos;
     $$buffer =~ /\G$RE(${SPACE}{$len})$NONSPACE/g or return;
+    return $parser->match_rule(pos($$buffer));
+}
+
+sub rule_block_ondent_sequence {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indents = $self->{indent};
+    my $len = $indents->[-1];
+    my $RE = $pos > 0 ? $EOL : $NOTHING;
+    pos($$buffer) = $pos;
+    $$buffer =~ /\G$RE(${SPACE}{$len})$DASHSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
 }
 
