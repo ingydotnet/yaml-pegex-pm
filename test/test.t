@@ -1,3 +1,4 @@
+use strict; use warnings; no warnings 'once';
 use lib 'inc';
 use lib '../pegex-pm/lib';
 use lib '../testml-pm/lib';
@@ -6,8 +7,25 @@ use TestML;
 use TestML::Compiler::Lite;
 $TestML::Compiler::Lite::point_marker = '\+\+\+';
 
+
+my @tests = qw(
+    54T7 65WH 8QBE 98YD 9FMG 9J7A 9SHH AVM7 D9TU DHP8 FQ7F J5UC JHB9 K4SU KMK3
+    PBJ2 RLU9 S4T7 SYW4 TE2A
+);
+
+# 93JH 9U5K 5C5M 5KJE 5BVJ 229Q 5NYZ 6JQW 77H8 H2RW
+do {
+    $main::MAX = 0;
+    $main::DEBUG = 1;
+    @tests = qw(54T7);
+} if 0;
+
+my $testml = join '', <DATA>, map
+    "%Include yaml-test-suite/test/$_.tml\n",
+    @tests;
+
 TestML->new(
-    testml => join('', <DATA>),
+    testml => $testml,
     bridge => 'Bridge',
     compiler => 'TestML::Compiler::Lite',
 )->run;
@@ -35,10 +53,6 @@ TestML->new(
     }
 }
 
-BEGIN {
-    $main::MAX = 0;
-    $main::DEBUG = 0;
-}
 __DATA__
 
 %TestML 0.1.0
@@ -46,27 +60,6 @@ Diff = 1
 Label = 'YAML to Events - $BlockLabel'
 
 *in-yaml.parse == *test-event
-
-# Working so far:
-%Include yaml-test-suite/test/54T7.tml
-%Include yaml-test-suite/test/65WH.tml
-%Include yaml-test-suite/test/8QBE.tml
-%Include yaml-test-suite/test/98YD.tml
-%Include yaml-test-suite/test/9FMG.tml
-%Include yaml-test-suite/test/9J7A.tml
-%Include yaml-test-suite/test/AVM7.tml
-%Include yaml-test-suite/test/D9TU.tml
-%Include yaml-test-suite/test/DHP8.tml
-%Include yaml-test-suite/test/FQ7F.tml
-%Include yaml-test-suite/test/J5UC.tml
-%Include yaml-test-suite/test/JHB9.tml
-%Include yaml-test-suite/test/K4SU.tml
-%Include yaml-test-suite/test/KMK3.tml
-%Include yaml-test-suite/test/PBJ2.tml
-%Include yaml-test-suite/test/RLU9.tml
-%Include yaml-test-suite/test/S4T7.tml
-%Include yaml-test-suite/test/SYW4.tml
-%Include yaml-test-suite/test/TE2A.tml
 
 # Try next:
 # Simple single and double quote

@@ -49,6 +49,30 @@ sub got_document_end {
     return;
 }
 
+sub got_block_plain_scalar {
+    my ($self, $got) = @_;
+    $self->send(SCALAR => ":$got");
+    return;
+}
+
+sub got_flow_plain_scalar {
+    my ($self, $got) = @_;
+    $self->send(SCALAR => ":$got");
+    return;
+}
+
+sub got_single_quoted_scalar {
+    my ($self, $got) = @_;
+    $self->send(SCALAR => "'$got");
+    return;
+}
+
+sub got_double_quoted_scalar {
+    my ($self, $got) = @_;
+    $self->send(SCALAR => "\"$got");
+    return;
+}
+
 sub got_block_key {
     my ($self, $got) = @_;
     my $level = @{$self->parser->grammar->{indent}} - 1;
@@ -83,12 +107,6 @@ sub got_block_undent {
     return;
 }
 
-sub got_block_scalar {
-    my ($self, $got) = @_;
-    $self->send(SCALAR => ":$got");
-    return;
-}
-
 sub got_flow_mapping_start {
     my ($self, $got) = @_;
     $self->send('MAPPING_START');
@@ -116,12 +134,6 @@ sub got_flow_sequence_end {
     $self->send('SEQUENCE_END');
     $self->{level}--;
     pop @{$self->{kind}};
-    return;
-}
-
-sub got_flow_scalar {
-    my ($self, $got) = @_;
-    $self->send(SCALAR => ":$got");
     return;
 }
 
