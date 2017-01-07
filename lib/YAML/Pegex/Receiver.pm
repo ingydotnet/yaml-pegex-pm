@@ -101,6 +101,19 @@ sub got_double_quoted_scalar {
     $self->send(SCALAR => "\"$got");
 }
 
+sub got_block_key_scalar {
+    my ($self, $got) = @_;
+    my @args = (":$got");
+    if (defined $self->{tag}) {
+        unshift @args, '<' . delete($self->{tag}) . '>';
+    }
+    if (defined $self->{anchor}) {
+        unshift @args, '&' . delete $self->{anchor};
+    }
+    $self->{block_key_scalar} = \@args;
+    return;
+}
+
 sub got_block_key {
     my ($self, $got) = @_;
     my $level = @{$self->parser->grammar->{indent}} - 1;
@@ -109,7 +122,7 @@ sub got_block_key {
         $self->{kind}[$self->{level}] = 'mapping';
         $self->send('MAPPING_START');
     }
-    $self->send(SCALAR => ":$got");
+    $self->send(SCALAR => @{delete($self->{block_key_scalar})});
 }
 
 sub got_block_indent_sequence {

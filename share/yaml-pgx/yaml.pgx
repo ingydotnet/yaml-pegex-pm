@@ -61,14 +61,12 @@ yaml-document:
 
 # A top level node can be quite a few distinct things:
 yaml-node:
-  yaml-alias |
-  yaml-prefix? (
-    | flow-sequence
-    | flow-mapping
-    | block-sequence
-    | block-mapping
-    | block-scalar
-  )
+  | yaml-alias
+  | yaml-prefix? (
+      | flow-sequence
+      | flow-mapping
+    )
+  | block-prefix? block-node
 
 #------------------------------------------------------------------------------
 # Block Constructs
@@ -76,9 +74,12 @@ yaml-node:
 
 # This rule identifies all the block nodes:
 block-node:
-  | block-sequence
-  | block-mapping
-  | block-scalar
+#   block-prefix? (
+  (
+    | block-sequence
+    | block-mapping
+    | yaml-prefix? block-scalar
+  )
 
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
@@ -105,13 +106,12 @@ block-mapping-pair:
   yaml-node
 
 # block key scalar, has more limitations than a block value scalar.
-block-key: / block-plain-scalar block-mapping-separator /
+block-key:
+  yaml-prefix?
+  block-key-scalar
+  block-mapping-separator
 
-# A block value can be any block or flow node:
-block-value:
-  | flow-mapping
-  | flow-sequence
-  | block-node
+block-key-scalar: / block-plain-scalar /
 
 # A scalar in block form can take one of these 5 forms:
 block-scalar:
@@ -226,6 +226,12 @@ document-foot: / '...' EOL /
 
 # Implicit document ending:
 document-end: ''
+
+block-prefix:
+  (
+    | yaml-anchor yaml-tag?
+    | yaml-tag yaml-anchor?
+  ) /(= EOL)/
 
 # A node prefix is a anchor and / or tag in any order.
 # XXX This construct is hard in PEG. Look for easier way.

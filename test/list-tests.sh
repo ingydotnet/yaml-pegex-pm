@@ -5,7 +5,9 @@ set -e
 for file in test/yaml-test-suite/test/*.tml; do
   id=${file%.tml}
   id=${id##*/}
-  grep "$id" test/white-list.txt &>/dev/null && continue
+  if [[ $1 != all ]]; then
+    grep "$id" test/white-list.txt &>/dev/null && continue
+  fi
   echo
   echo === $id ===
   echo

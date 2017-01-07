@@ -50,7 +50,6 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # TS54 - Top level folded
 # UGM3 - Invoice example
 # UT92 - Empty documents
-# ZH7C - Simple block map with anchor on first key
 
 # Categories of unsolved problems:
 # - empty keys and values
