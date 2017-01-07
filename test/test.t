@@ -7,18 +7,21 @@ use TestML;
 use TestML::Compiler::Lite;
 $TestML::Compiler::Lite::point_marker = '\+\+\+';
 
+# Try next:
+# MZX3 J9HZ 93JH 9U5K 5C5M 5BVJ 229Q 5NYZ 6JQW 77H8 H2RW UT92
 
-my @tests = qw(
-    54T7 65WH 8QBE 98YD 9FMG 9J7A 9SHH AVM7 D9TU DHP8 FQ7F J5UC JHB9 K4SU KMK3
-    PBJ2 RLU9 S4T7 SYW4 TE2A
-);
+$main::MAX = $ENV{MAX} // 0;
+$main::DEBUG = $ENV{DEBUG} // 0;
+$ENV{ONLY} ||= '';
 
-# 93JH 9U5K 5C5M 5KJE 5BVJ 229Q 5NYZ 6JQW 77H8 H2RW
-do {
-    $main::MAX = 0;
-    $main::DEBUG = 1;
-    @tests = qw(54T7);
-} if 0;
+my @tests = ();
+if ($ENV{ONLY}) {
+    @tests = ($ENV{ONLY});
+}
+else {
+    open my $fh, '<', 'test/white-list.txt';
+    @tests = map { chomp; $_ } <$fh>;
+}
 
 my $testml = join '', <DATA>, map
     "%Include yaml-test-suite/test/$_.tml\n",
@@ -62,15 +65,11 @@ Label = 'YAML to Events - $BlockLabel'
 *in-yaml.parse == *test-event
 
 # Try next:
-# Simple single and double quote
-# %Include yaml-test-suite/test/9SHH.tml
 # Simple seq of maps
 # %Include yaml-test-suite/test/93JH.tml
 # %Include yaml-test-suite/test/9U5K.tml
 # Simple sequence of flow maps
 # %Include yaml-test-suite/test/5C5M.tml
-# Simple sequence of flow seqs
-# %Include yaml-test-suite/test/5KJE.tml
 # = Simple literal and folded
 # %Include yaml-test-suite/test/5BVJ.tml
 # = Indentation seq of maps

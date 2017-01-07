@@ -18,6 +18,7 @@ my $events = {
     SEQUENCE_START => '+SEQ',
     SEQUENCE_END => '-SEQ',
     SCALAR => '=VAL',
+    ALIAS => '=ALI',
 };
 
 sub initial {
@@ -50,16 +51,11 @@ sub final {
 
 sub send {
     my ($self, $name, @args) = @_;
-    my $event;
     $name = $events->{$name} or die "Unknown event: '$name'";
-    if ($name eq 'SCALAR') {
-        my $value = shift(@args);
-        $event = join ' ', join(' ', $name, @args), $value;
+    if (defined $self->{anchor}) {
+        unshift @args, '&' . delete $self->{anchor};
     }
-    else {
-        $event = join(' ', $name, @args);
-    }
-    push @{$self->{events}}, $event;
+    push @{$self->{events}}, join(' ', $name, @args);
     return;
 }
 

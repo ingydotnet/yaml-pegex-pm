@@ -49,6 +49,18 @@ sub got_document_end {
     return;
 }
 
+sub got_node_alias {
+    my ($self, $got) = @_;
+    $self->send(ALIAS => "*$got");
+    return;
+}
+
+sub got_node_anchor {
+    my ($self, $got) = @_;
+    $self->{anchor} = $got;
+    return;
+}
+
 sub got_block_plain_scalar {
     my ($self, $got) = @_;
     $self->send(SCALAR => ":$got");
@@ -57,18 +69,27 @@ sub got_block_plain_scalar {
 
 sub got_flow_plain_scalar {
     my ($self, $got) = @_;
+    $got =~ s/\ +$//;
     $self->send(SCALAR => ":$got");
     return;
 }
 
 sub got_single_quoted_scalar {
     my ($self, $got) = @_;
+    $got =~ s{((?:[ \t]*\r?\n[ \t]*)+)}{
+        my $c = $1 =~ tr/\n//;
+        $c == 1 ? ' ' : '\n' x ($c - 1);
+    }ge;
     $self->send(SCALAR => "'$got");
     return;
 }
 
 sub got_double_quoted_scalar {
     my ($self, $got) = @_;
+    $got =~ s{((?:[ \t]*\r?\n[ \t]*)+)}{
+        my $c = $1 =~ tr/\n//;
+        $c == 1 ? ' ' : '\n' x ($c - 1);
+    }ge;
     $self->send(SCALAR => "\"$got");
     return;
 }
