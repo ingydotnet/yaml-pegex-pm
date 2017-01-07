@@ -7,71 +7,77 @@ has data => {};
 
 sub setup {
     my ($self) = @_;
+}
+
+sub initial {
+    my ($self) = @_;
     $self->{stack} = [];
     $self->{kind} = [];
     $self->{level} = -1;
 }
 
-sub initial {
-    my ($self) = @_;
-    $self->setup;
-    $self->send('STREAM_START');
-    return;
-}
-
 sub final {
     my ($self, $got) = @_;
-    $self->send('STREAM_END');
     return $self->data;
+}
+
+sub got_stream_start {
+    my ($self) = @_;
+    $self->send('STREAM_START');
+}
+
+sub got_stream_end {
+    my ($self) = @_;
+    $self->send('STREAM_END');
 }
 
 sub got_document_head {
     my ($self, $got) = @_;
     $self->send('DOCUMENT_START', '---');
-    return;
 }
 
 sub got_document_start {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->send('DOCUMENT_START');
-    return;
 }
 
 sub got_document_foot {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->send('DOCUMENT_END', '...');
-    return;
 }
 
 sub got_document_end {
     my ($self, $got) = @_;
     $self->send('DOCUMENT_END');
-    return;
 }
 
-sub got_node_alias {
+sub got_yaml_alias {
     my ($self, $got) = @_;
     $self->send(ALIAS => "*$got");
+}
+
+sub got_yaml_anchor {
+    my ($self, $got) = @_;
+    $self->{anchor} = $got;
     return;
 }
 
-sub got_node_anchor {
-    my ($self, $got) = @_;
-    $self->{anchor} = $got;
+sub got_yaml_tag {
+    my ($self, $tag) = @_;
+    $tag = "tag:yaml.org,2002:$1" if $tag =~ /^!!(.*)/;
+    $self->{tag} = $tag;
     return;
 }
 
 sub got_block_plain_scalar {
     my ($self, $got) = @_;
     $self->send(SCALAR => ":$got");
-    return;
 }
 
 sub got_flow_plain_scalar {
     my ($self, $got) = @_;
     $got =~ s/\ +$//;
     $self->send(SCALAR => ":$got");
-    return;
 }
 
 sub got_single_quoted_scalar {
@@ -80,8 +86,8 @@ sub got_single_quoted_scalar {
         my $c = $1 =~ tr/\n//;
         $c == 1 ? ' ' : '\n' x ($c - 1);
     }ge;
+    $got =~ s/''/'/g;
     $self->send(SCALAR => "'$got");
-    return;
 }
 
 sub got_double_quoted_scalar {
@@ -90,8 +96,9 @@ sub got_double_quoted_scalar {
         my $c = $1 =~ tr/\n//;
         $c == 1 ? ' ' : '\n' x ($c - 1);
     }ge;
+    $got =~ s/\\"/"/g;
+    $got =~ s/\t/\\t/g;
     $self->send(SCALAR => "\"$got");
-    return;
 }
 
 sub got_block_key {
@@ -103,59 +110,48 @@ sub got_block_key {
         $self->send('MAPPING_START');
     }
     $self->send(SCALAR => ":$got");
-    return;
 }
 
 sub got_block_indent_sequence {
     my ($self) = (shift);
     $self->{kind}[++$self->{level}] = 'sequence';
     $self->send('SEQUENCE_START');
-    return;
 }
 
 sub got_block_undent {
     my ($self, $got) = @_;
-    if ($self->{kind}[$self->{level}]) {
-        if ($self->{kind}[$self->{level}] eq 'mapping') {
-            $self->send('MAPPING_END');
-        }
-        elsif ($self->{kind}[$self->{level}] eq 'sequence') {
-            $self->send('SEQUENCE_END');
-        }
-    }
+    my $event = $self->{kind}[$self->{level}] eq 'mapping'
+        ? 'MAPPING_END'
+        : 'SEQUENCE_END';
     $self->{level}--;
     pop @{$self->{kind}};
-    return;
+    $self->send($event);
 }
 
 sub got_flow_mapping_start {
     my ($self, $got) = @_;
-    $self->send('MAPPING_START');
     $self->{kind}[++$self->{level}] = 'mapping';
-    return;
+    $self->send('MAPPING_START');
 }
 
 sub got_flow_mapping_end {
     my ($self, $got) = @_;
-    $self->send('MAPPING_END');
     $self->{level}--;
     pop @{$self->{kind}};
-    return;
+    $self->send('MAPPING_END');
 }
 
 sub got_flow_sequence_start {
     my ($self, $got) = @_;
-    $self->send('SEQUENCE_START');
     $self->{kind}[++$self->{level}] = 'sequence';
-    return;
+    $self->send('SEQUENCE_START');
 }
 
 sub got_flow_sequence_end {
     my ($self, $got) = @_;
-    $self->send('SEQUENCE_END');
     $self->{level}--;
     pop @{$self->{kind}};
-    return;
+    $self->send('SEQUENCE_END');
 }
 
 1;

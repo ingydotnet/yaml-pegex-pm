@@ -52,6 +52,9 @@ sub final {
 sub send {
     my ($self, $name, @args) = @_;
     $name = $events->{$name} or die "Unknown event: '$name'";
+    if (defined $self->{tag}) {
+        unshift @args, '<' . delete($self->{tag}) . '>';
+    }
     if (defined $self->{anchor}) {
         unshift @args, '&' . delete $self->{anchor};
     }

@@ -8,7 +8,70 @@ use TestML::Compiler::Lite;
 $TestML::Compiler::Lite::point_marker = '\+\+\+';
 
 # Try next:
-# MZX3 J9HZ 93JH 9U5K 5C5M 5BVJ 229Q 5NYZ 6JQW 77H8 H2RW UT92
+# 3ALJ - Block seq in seq
+# 57H4 - Various block tags
+# 5BVJ - Simple literal and folded
+# 6FWR - Top level literal w/ +
+# 6JQW - Top level literal scalar
+# 6JWB - Various block tags
+# 6VJK - Top level folded
+# 77H8 - Block map with tags and literal values
+# 7BUB - Block seq in map with comments and anchor/alias
+# 7T8X - Top level folded scalar
+# 93JH - Simple block seq of map
+# 96L6 - Top level folded scalar
+# 9U5K - Simple block seq of map
+# A6F9 - Simple map of literals
+# AZW3 - Simple block sew of map
+# C2DT - Flow map with empty value
+# DWX9 - Top level literal
+# F8F9 - Block map of literals with various comments
+# G4RS - Unicode and other escapes
+# G992 - Top level folded scalar
+# H2RW - Simple map with a literal
+# HMK4 - Map with fold and literal
+# J7PZ - Map in seq with top level tag
+# J9HZ - Simple seq in map, but comments in a couple places
+# JQ4R - Map in seq in map
+# K527 - Top level folded
+# K858 - Map of empty folded and literal
+# KZN9 - Seq of flow seq with interesting values
+# L9U5 - Flow seq with pair
+# M29M - Map with literal
+# M9B4 - Top level literal
+# MJS9 - Top level folded
+# MYW6 - Top level literal w/ '-'
+# MZX3 - Seq of various scalar styles
+# NP9H - \$ in double quoted string
+# P2AD - Seq of folded and literal
+# QF4Y - Pair in flow seq
+# R4YG - Seq of folded and literal
+# RR7F - Simple ? explicit key
+# TS54 - Top level folded
+# UGM3 - Invoice example
+# UT92 - Empty documents
+# ZH7C - Simple block map with anchor on first key
+
+# Categories of unsolved problems:
+# - empty keys and values
+# - empty documents
+# - map in seq
+# - literal scalars
+# - folded scalars
+# - multiline plain scalars
+# - explicit key '?'
+# - directives %TAG and %YAML
+# - prefixed block scalar keys
+# - block collection keys
+# - flow seq with pairs
+# - flow map with singles
+
+# Test commands:
+# :wa|!time prove -lv test/
+# :wa|!ONLY=V55R prove -lv test/
+# :wa|!DEBUG=1 MAX=0 ONLY=UT92 prove -lv test/ |& less
+# :!perl -Ilib -MYAML::Pegex::Grammar=compile
+# :!./test/list-tests.sh > need
 
 $main::MAX = $ENV{MAX} // 0;
 $main::DEBUG = $ENV{DEBUG} // 0;
@@ -64,28 +127,3 @@ Label = 'YAML to Events - $BlockLabel'
 
 *in-yaml.parse == *test-event
 
-# Try next:
-# Simple seq of maps
-# %Include yaml-test-suite/test/93JH.tml
-# %Include yaml-test-suite/test/9U5K.tml
-# Simple sequence of flow maps
-# %Include yaml-test-suite/test/5C5M.tml
-# = Simple literal and folded
-# %Include yaml-test-suite/test/5BVJ.tml
-# = Indentation seq of maps
-# %Include yaml-test-suite/test/229Q.tml
-# - Mapping scalar on next line
-# %Include yaml-test-suite/test/5NYZ.tml
-
-# These were attempted but not working yet:
-# |  %Include yaml-test-suite/test/6JQW.tml
-# hangs  %Include yaml-test-suite/test/77H8.tml
-# hangs  %Include yaml-test-suite/test/H2RW.tml
-
-# tinita has these working in another parser:
-# %Include yaml-test-suite/test/2JQS.tml
-# %Include yaml-test-suite/test/6FWR.tml
-# %Include yaml-test-suite/test/8G76.tml
-# %Include yaml-test-suite/test/96L6.tml
-# %Include yaml-test-suite/test/G992.tml
-# %Include yaml-test-suite/test/MYW6.tml

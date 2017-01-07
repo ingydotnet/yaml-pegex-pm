@@ -13,7 +13,7 @@ my $EOL = qr/\r?\n/;
 my $EOD = qr/(?:$EOL)?(?=\z|\.\.\.\r?\n|\-\-\-\r?\n)/;
 my $SPACE = qr/ /;
 my $DASH = qr/\-/;
-my $DASHSPACE = qr/(?=$DASH$SPACE)/;
+my $DASHSPACE = qr/(?=$DASH\s)/;
 my $NONSPACE = qr/(?=[^\s\#])/;
 my $NOTHING = qr//;
 
@@ -87,14 +87,14 @@ sub rule_block_undent {
     return;
 }
 
-sub make_tree {
-    use Pegex::Bootstrap;
-    use IO::All;
-    my $grammar = io->file(file)->all;
-    Pegex::Bootstrap->new->compile($grammar)->tree;
-}
-sub make_treeXXX {
-# sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.60)
+# sub make_tree {
+#     use Pegex::Bootstrap;
+#     use IO::All;
+#     my $grammar = io->file(file)->all;
+#     Pegex::Bootstrap->new->compile($grammar)->tree;
+# }
+# sub make_treeXXX {
+sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
   {
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
@@ -102,11 +102,8 @@ sub make_treeXXX {
     'EOL' => {
       '.rgx' => qr/\G\r?\n/
     },
-    'SPACE' => {
-      '.rgx' => qr/\G\ /
-    },
     'block_key' => {
-      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z)):(?:\ +|\ *(?=\r?\n))/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z):(?:\ +|\ *(?=\r?\n))/
     },
     'block_mapping' => {
       '.all' => [
@@ -114,8 +111,43 @@ sub make_treeXXX {
           '.ref' => 'block_indent'
         },
         {
-          '+min' => 1,
-          '.ref' => 'block_mapping_pair'
+          '.all' => [
+            {
+              '.ref' => 'block_mapping_pair'
+            },
+            {
+              '+min' => 0,
+              '-flat' => 1,
+              '.all' => [
+                {
+                  '+min' => 0,
+                  '.all' => [
+                    {
+                      '.ref' => 'EOL'
+                    },
+                    {
+                      '.ref' => 'ignore_line'
+                    }
+                  ]
+                },
+                {
+                  '.ref' => 'block_mapping_pair'
+                }
+              ]
+            },
+            {
+              '+max' => 1,
+              '+min' => 0,
+              '.all' => [
+                {
+                  '.ref' => 'EOL'
+                },
+                {
+                  '.ref' => 'ignore_line'
+                }
+              ]
+            }
+          ]
         },
         {
           '.ref' => 'block_undent'
@@ -131,51 +163,73 @@ sub make_treeXXX {
           '.ref' => 'block_key'
         },
         {
-          '.ref' => 'block_value'
+          '.ref' => 'yaml_node'
         }
       ]
     },
-    'block_node' => {
-      '.any' => [
-        {
-          '.ref' => 'block_sequence'
-        },
-        {
-          '.ref' => 'block_mapping'
-        },
-        {
-          '.ref' => 'block_scalar'
-        }
-      ]
+    'block_plain_scalar' => {
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
     },
     'block_scalar' => {
-      '.rgx' => qr/\G(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))/
-    },
-    'block_sequence' => {
-      '+min' => 1,
-      '.ref' => 'block_sequence_entry'
-    },
-    'block_sequence_entry' => {
-      '.rgx' => qr/\G\-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))\r?\n/
-    },
-    'block_value' => {
       '.any' => [
         {
-          '.ref' => 'flow_mapping'
+          '.ref' => 'literal_scalar'
         },
         {
-          '.ref' => 'flow_sequence'
+          '.ref' => 'folded_scalar'
         },
         {
-          '.ref' => 'block_node'
+          '.ref' => 'double_quoted_scalar'
+        },
+        {
+          '.ref' => 'single_quoted_scalar'
+        },
+        {
+          '.ref' => 'block_plain_scalar'
         }
       ]
+    },
+    'block_sequence' => {
+      '.all' => [
+        {
+          '.ref' => 'block_indent_sequence'
+        },
+        {
+          '+min' => 1,
+          '.ref' => 'block_sequence_entry'
+        },
+        {
+          '.ref' => 'block_undent'
+        }
+      ]
+    },
+    'block_sequence_entry' => {
+      '.all' => [
+        {
+          '.ref' => 'block_ondent_sequence'
+        },
+        {
+          '.rgx' => qr/\G\-(?:\ +|\ *(?=\r?\n))/
+        },
+        {
+          '.ref' => 'yaml_node'
+        }
+      ]
+    },
+    'document_end' => {
+      '.rgx' => qr/\G/
     },
     'document_foot' => {
       '.rgx' => qr/\G\.\.\.\r?\n/
     },
     'document_head' => {
-      '.rgx' => qr/\G\-\-\-(?:\ +|(?=\r?\n))/
+      '.rgx' => qr/\G\r?\n?\-\-\-(?:\ +|(?=\r?\n))/
+    },
+    'document_start' => {
+      '.rgx' => qr/\G(?=[\s\S]*[^\r?\n])/
+    },
+    'double_quoted_scalar' => {
+      '.rgx' => qr/\G"((?:\\"|[^"])*)"/
     },
     'flow_mapping' => {
       '.all' => [
@@ -212,7 +266,7 @@ sub make_treeXXX {
       ]
     },
     'flow_mapping_end' => {
-      '.rgx' => qr/\G\s*\}\s*/
+      '.rgx' => qr/\G\s*\}\ */
     },
     'flow_mapping_pair' => {
       '.all' => [
@@ -228,26 +282,50 @@ sub make_treeXXX {
       ]
     },
     'flow_mapping_separator' => {
-      '.rgx' => qr/\G:(?:\ +|\ *(?=\r?\n))/
+      '.rgx' => qr/\G\s*:(?:\ +|\ *(?=\r?\n))/
     },
     'flow_mapping_start' => {
       '.rgx' => qr/\G\s*\{\s*/
     },
     'flow_node' => {
-      '.any' => [
+      '.all' => [
         {
-          '.ref' => 'flow_sequence'
+          '+max' => 1,
+          '.ref' => 'yaml_prefix'
         },
         {
-          '.ref' => 'flow_mapping'
-        },
-        {
-          '.ref' => 'flow_scalar'
+          '.any' => [
+            {
+              '.ref' => 'yaml_alias'
+            },
+            {
+              '.ref' => 'flow_sequence'
+            },
+            {
+              '.ref' => 'flow_mapping'
+            },
+            {
+              '.ref' => 'flow_scalar'
+            }
+          ]
         }
       ]
     },
+    'flow_plain_scalar' => {
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?=[&\*\{\}\[\]%"',]|:\ |,\ |\r?\n|\z)/
+    },
     'flow_scalar' => {
-      '.rgx' => qr/\G("[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=[&\*\#\{\}\[\]%,]|:\ |,\ |\r?\n|\z))/
+      '.any' => [
+        {
+          '.ref' => 'double_quoted_scalar'
+        },
+        {
+          '.ref' => 'single_quoted_scalar'
+        },
+        {
+          '.ref' => 'flow_plain_scalar'
+        }
+      ]
     },
     'flow_sequence' => {
       '.all' => [
@@ -258,7 +336,7 @@ sub make_treeXXX {
           '+max' => 1,
           '.all' => [
             {
-              '.ref' => 'flow_sequence_entry'
+              '.ref' => 'flow_node'
             },
             {
               '+min' => 0,
@@ -268,7 +346,7 @@ sub make_treeXXX {
                   '.ref' => 'list_separator'
                 },
                 {
-                  '.ref' => 'flow_sequence_entry'
+                  '.ref' => 'flow_node'
                 }
               ]
             },
@@ -284,129 +362,161 @@ sub make_treeXXX {
       ]
     },
     'flow_sequence_end' => {
-      '.rgx' => qr/\G\s*\]\s*/
-    },
-    'flow_sequence_entry' => {
-      '.ref' => 'flow_scalar'
+      '.rgx' => qr/\G\s*\]\ */
     },
     'flow_sequence_start' => {
       '.rgx' => qr/\G\s*\[\s*/
     },
+    'folded_scalar' => {
+      '.rgx' => qr/\G\>\r?\nXXX/
+    },
     'ignore_line' => {
-      '.rgx' => qr/\G(?:\#.*|[\ \t]*)(?=\r?\n)/
+      '.rgx' => qr/\G(?:[\ \t]*\#.*|[\ \t]*)(?=\r?\n)/
     },
     'list_separator' => {
-      '.rgx' => qr/\G,\ +/
+      '.rgx' => qr/\G\s*,\s*/
     },
-    'node_alias' => {
+    'literal_scalar' => {
+      '.rgx' => qr/\G\|\r?\nXXX/
+    },
+    'single_quoted_scalar' => {
+      '.rgx' => qr/\G'((?:''|[^'])*)'/
+    },
+    'stream_end' => {
+      '.rgx' => qr/\G\r?\n?/
+    },
+    'stream_start' => {
+      '.rgx' => qr/\G/
+    },
+    'yaml_alias' => {
       '.rgx' => qr/\G\*(\w+)/
     },
-    'node_anchor' => {
-      '.rgx' => qr/\G\&(\w+)/
-    },
-    'node_prefix' => {
-      '.any' => [
-        {
-          '.all' => [
-            {
-              '.ref' => 'node_anchor'
-            },
-            {
-              '+max' => 1,
-              '.all' => [
-                {
-                  '+min' => 1,
-                  '.ref' => 'SPACE'
-                },
-                {
-                  '.ref' => 'node_tag'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          '.all' => [
-            {
-              '.ref' => 'node_tag'
-            },
-            {
-              '+max' => 1,
-              '.all' => [
-                {
-                  '+min' => 1,
-                  '.ref' => 'SPACE'
-                },
-                {
-                  '.ref' => 'node_anchor'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    'node_tag' => {
-      '.rgx' => qr/\G!!?(\w+)/
-    },
-    'top_node' => {
-      '.all' => [
-        {
-          '+max' => 1,
-          '.ref' => 'node_prefix'
-        },
-        {
-          '.any' => [
-            {
-              '.ref' => 'node_alias'
-            },
-            {
-              '.ref' => 'flow_mapping'
-            },
-            {
-              '.ref' => 'flow_sequence'
-            },
-            {
-              '.ref' => 'block_sequence'
-            },
-            {
-              '.ref' => 'block_mapping'
-            },
-            {
-              '.ref' => 'block_scalar'
-            }
-          ]
-        },
-        {
-          '+max' => 1,
-          '.ref' => 'EOL'
-        }
-      ]
+    'yaml_anchor' => {
+      '.rgx' => qr/\G\&(\w+)\s*/
     },
     'yaml_document' => {
       '.all' => [
         {
-          '+max' => 1,
-          '.ref' => 'document_head'
+          '.any' => [
+            {
+              '.ref' => 'document_head'
+            },
+            {
+              '.ref' => 'document_start'
+            }
+          ]
         },
         {
-          '.ref' => 'top_node'
+          '.all' => [
+            {
+              '.ref' => 'yaml_node'
+            },
+            {
+              '+max' => 1,
+              '.ref' => 'EOL'
+            }
+          ]
         },
         {
           '+max' => 1,
           '.ref' => 'ignore_line'
         },
         {
-          '+max' => 1,
-          '.ref' => 'document_foot'
+          '.any' => [
+            {
+              '.ref' => 'document_foot'
+            },
+            {
+              '.ref' => 'document_end'
+            }
+          ]
+        }
+      ]
+    },
+    'yaml_node' => {
+      '.any' => [
+        {
+          '.ref' => 'yaml_alias'
+        },
+        {
+          '.all' => [
+            {
+              '+max' => 1,
+              '.ref' => 'yaml_prefix'
+            },
+            {
+              '.any' => [
+                {
+                  '.ref' => 'flow_sequence'
+                },
+                {
+                  '.ref' => 'flow_mapping'
+                },
+                {
+                  '.ref' => 'block_sequence'
+                },
+                {
+                  '.ref' => 'block_mapping'
+                },
+                {
+                  '.ref' => 'block_scalar'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    'yaml_prefix' => {
+      '.any' => [
+        {
+          '.all' => [
+            {
+              '.ref' => 'yaml_anchor'
+            },
+            {
+              '+max' => 1,
+              '.ref' => 'yaml_tag'
+            }
+          ]
+        },
+        {
+          '.all' => [
+            {
+              '.ref' => 'yaml_tag'
+            },
+            {
+              '+max' => 1,
+              '.ref' => 'yaml_anchor'
+            }
+          ]
         }
       ]
     },
     'yaml_stream' => {
       '.all' => [
         {
-          '+min' => 0,
-          '.ref' => 'ignore_line'
+          '.ref' => 'stream_start'
+        },
+        {
+          '+max' => 1,
+          '.all' => [
+            {
+              '.ref' => 'ignore_line'
+            },
+            {
+              '+min' => 0,
+              '-flat' => 1,
+              '.all' => [
+                {
+                  '.ref' => 'EOL'
+                },
+                {
+                  '.ref' => 'ignore_line'
+                }
+              ]
+            }
+          ]
         },
         {
           '+min' => 0,
@@ -419,8 +529,14 @@ sub make_treeXXX {
               '.ref' => 'ignore_line'
             }
           ]
+        },
+        {
+          '.ref' => 'stream_end'
         }
       ]
+    },
+    'yaml_tag' => {
+      '.rgx' => qr/\G(\!\S*)\s*/
     }
   }
 }
