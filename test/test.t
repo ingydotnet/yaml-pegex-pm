@@ -50,6 +50,7 @@ Label = 'YAML to Events - $BlockLabel'
 # Working so far:
 %Include yaml-test-suite/test/54T7.tml
 %Include yaml-test-suite/test/65WH.tml
+%Include yaml-test-suite/test/8QBE.tml
 %Include yaml-test-suite/test/98YD.tml
 %Include yaml-test-suite/test/9FMG.tml
 %Include yaml-test-suite/test/9J7A.tml
@@ -58,16 +59,31 @@ Label = 'YAML to Events - $BlockLabel'
 %Include yaml-test-suite/test/DHP8.tml
 %Include yaml-test-suite/test/FQ7F.tml
 %Include yaml-test-suite/test/J5UC.tml
+%Include yaml-test-suite/test/JHB9.tml
 %Include yaml-test-suite/test/K4SU.tml
 %Include yaml-test-suite/test/KMK3.tml
 %Include yaml-test-suite/test/PBJ2.tml
 %Include yaml-test-suite/test/RLU9.tml
 %Include yaml-test-suite/test/S4T7.tml
 %Include yaml-test-suite/test/SYW4.tml
+%Include yaml-test-suite/test/TE2A.tml
 
 # Try next:
+# Simple single and double quote
+# %Include yaml-test-suite/test/9SHH.tml
+# Simple seq of maps
+# %Include yaml-test-suite/test/93JH.tml
+# %Include yaml-test-suite/test/9U5K.tml
+# Simple sequence of flow maps
+# %Include yaml-test-suite/test/5C5M.tml
+# Simple sequence of flow seqs
+# %Include yaml-test-suite/test/5KJE.tml
+# = Simple literal and folded
+# %Include yaml-test-suite/test/5BVJ.tml
 # = Indentation seq of maps
 # %Include yaml-test-suite/test/229Q.tml
+# - Mapping scalar on next line
+# %Include yaml-test-suite/test/5NYZ.tml
 
 # These were attempted but not working yet:
 # |  %Include yaml-test-suite/test/6JQW.tml
