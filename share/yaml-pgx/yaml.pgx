@@ -42,7 +42,7 @@ yaml-stream:
   ignore-line* % EOL
   (
     yaml-document
-    ignore-line*
+    ignore-line* % EOL
   )*
   stream-end
 
@@ -172,8 +172,8 @@ flow-mapping-end: /- '}' SPACE*/
 #------------------------------------------------------------------------------
 
 # Literal scalar.
-# XXX Dummied out for now.
-literal-scalar: / '|' EOL 'XXX' /
+# literal-scalar: # This rule is written in code in the Grammar class.
+# It needs access to the indent level.
 
 # Folded scalar.
 # XXX Dummied out for now.

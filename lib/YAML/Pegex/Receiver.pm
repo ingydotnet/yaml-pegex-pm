@@ -11,13 +11,13 @@ sub setup {
 
 sub initial {
     my ($self) = @_;
-    $self->{stack} = [];
-    $self->{kind} = [];
-    $self->{level} = -1;
+    $self->{stack} = [''];
+    $self->{kind} = [''];
+    $self->{level} = 0;
 }
 
 sub final {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     return $self->data;
 }
 
@@ -32,7 +32,7 @@ sub got_stream_end {
 }
 
 sub got_document_head {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->send('DOCUMENT_START', '---');
 }
 
@@ -47,7 +47,7 @@ sub got_document_foot {
 }
 
 sub got_document_end {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->send('DOCUMENT_END');
 }
 
@@ -101,6 +101,14 @@ sub got_double_quoted_scalar {
     $self->send(SCALAR => "\"$got");
 }
 
+sub got_literal_scalar {
+    my ($self, $got) = @_;
+    $got =~ s/\\/\\\\/g;
+    $got =~ s/\t/\\t/g;
+    $got =~ s/\n/\\n/g;
+    $self->send(SCALAR => "|$got");
+}
+
 sub got_block_key_scalar {
     my ($self, $got) = @_;
     my @args = (":$got");
@@ -115,7 +123,7 @@ sub got_block_key_scalar {
 }
 
 sub got_block_key {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     my $level = @{$self->parser->grammar->{indent}} - 1;
     $self->{level} = $level if $level > $self->{level};
     if (not $self->{kind}[$self->{level}]) {
@@ -132,7 +140,7 @@ sub got_block_indent_sequence {
 }
 
 sub got_block_undent {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     my $event = $self->{kind}[$self->{level}] eq 'mapping'
         ? 'MAPPING_END'
         : 'SEQUENCE_END';
@@ -142,26 +150,26 @@ sub got_block_undent {
 }
 
 sub got_flow_mapping_start {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->{kind}[++$self->{level}] = 'mapping';
     $self->send('MAPPING_START');
 }
 
 sub got_flow_mapping_end {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->{level}--;
     pop @{$self->{kind}};
     $self->send('MAPPING_END');
 }
 
 sub got_flow_sequence_start {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->{kind}[++$self->{level}] = 'sequence';
     $self->send('SEQUENCE_START');
 }
 
 sub got_flow_sequence_end {
-    my ($self, $got) = @_;
+    my ($self) = @_;
     $self->{level}--;
     pop @{$self->{kind}};
     $self->send('SEQUENCE_END');

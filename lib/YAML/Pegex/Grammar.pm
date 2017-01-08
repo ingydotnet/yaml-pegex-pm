@@ -7,7 +7,7 @@ extends 'Pegex::Grammar';
 
 use constant file => './share/yaml-pgx/yaml.pgx';
 
-has indent => [];
+has indent => [-1];
 
 my $EOL = qr/\r?\n/;
 my $EOD = qr/(?:$EOL)?(?=\z|\.\.\.\r?\n|\-\-\-\r?\n)/;
@@ -20,44 +20,41 @@ my $NOTHING = qr//;
 sub rule_block_indent {
     my ($self, $parser, $buffer, $pos) = @_;
     return if $pos >= length($$buffer);
-    my $indents = $self->{indent};
+    my $indent = $self->{indent};
     pos($$buffer) = $pos;
     if ($pos == 0) {
         $$buffer =~ /\G($SPACE*)$NONSPACE/g or die;
-        push @$indents, length($1);
+        push @$indent, length($1);
         return $parser->match_rule($pos);
     }
-    my $len = @$indents ? $indents->[-1] + 1 : 0;
+    my $len = $indent->[-1] + 1;
     $$buffer =~ /\G$EOL(${SPACE}{$len,})$NONSPACE/g or return;
-    push @$indents, length($1);
+    push @$indent, length($1);
     return $parser->match_rule($pos);
 }
 
 sub rule_block_indent_sequence {
     my ($self, $parser, $buffer, $pos) = @_;
     return if $pos >= length($$buffer);
-    my $indents = $self->{indent};
+    my $indent = $self->{indent};
     pos($$buffer) = $pos;
     if ($pos == 0) {
         $$buffer =~ /\G($SPACE*)$DASHSPACE/g or return;
-        push @$indents, length($1);
+        push @$indent, length($1);
         return $parser->match_rule($pos);
     }
     my $len = 0;
-    if (@$indents) {
-        $len = $indents->[-1];
-        $len++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
-    }
-    # warn ">$len\n";
+    $len = $indent->[-1];
+    $len++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
     $$buffer =~ /\G$EOL(${SPACE}{$len,})$DASHSPACE/g or return;
-    push @$indents, length($1);
+    push @$indent, length($1);
     return $parser->match_rule($pos);
 }
 
 sub rule_block_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
-    my $indents = $self->{indent};
-    my $len = $indents->[-1];
+    my $indent = $self->{indent};
+    my $len = $indent->[-1];
     my $RE = $pos > 0 ? $EOL : $NOTHING;
     pos($$buffer) = $pos;
     $$buffer =~ /\G$RE(${SPACE}{$len})$NONSPACE/g or return;
@@ -66,8 +63,8 @@ sub rule_block_ondent {
 
 sub rule_block_ondent_sequence {
     my ($self, $parser, $buffer, $pos) = @_;
-    my $indents = $self->{indent};
-    my $len = $indents->[-1];
+    my $indent = $self->{indent};
+    my $len = $indent->[-1];
     my $RE = $pos > 0 ? $EOL : $NOTHING;
     pos($$buffer) = $pos;
     $$buffer =~ /\G$RE(${SPACE}{$len})$DASHSPACE/g or return;
@@ -76,15 +73,57 @@ sub rule_block_ondent_sequence {
 
 sub rule_block_undent {
     my ($self, $parser, $buffer, $pos) = @_;
-    my $indents = $self->{indent};
-    return unless @$indents;
-    my $len = $indents->[-1];
+    my $indent = $self->{indent};
+    return unless @$indent;
+    my $len = $indent->[-1];
     pos($$buffer) = $pos;
     if ($$buffer =~ /\G$EOD|(?!$EOL {$len})/g) {
-        pop @$indents;
+        pop @$indent;
         return $parser->match_rule($pos);
     }
     return;
+}
+
+sub rule_literal_scalar {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indent = $self->{indent};
+    return unless @$indent;
+    $indent = $indent->[-1] + 1;
+    my $pad = 0;
+    my $chomp = 0;
+    my $keep = 0;
+    pos($$buffer) = $pos;
+    $$buffer =~ /\G\|(\d*[-+]?)?$EOL/g or return;
+    my $ind = $1;
+    $pad = $1 if $ind =~ /(\d+)/;
+    $chomp = 1 if $ind =~ /\-/;
+    $keep = 1 if $ind =~ /\+/;
+    $pos = pos($$buffer);
+    my $value = '';
+    while ($$buffer =~ /\G
+        (?:
+            \ {$indent} |
+            \ *(?=\n)
+        )
+        (.*\n)
+    /gx) {
+        my $line = " $1";
+        if (not $pad) {
+            $line =~ s/^(\ +)// or die;
+            $pad = length $1;
+        }
+        else {
+            if ($line !~ s/^\ {$pad}//) {
+                last if $line =~ /\S/;
+                $line = "\n";
+            }
+        }
+        $value .= $line;
+        $pos = pos($$buffer);
+    }
+    $value =~ s/\n+\z/\n/ unless $keep;
+    chomp $value if $chomp;
+    $parser->match_rule(--$pos, [$value]);
 }
 
 sub make_tree {

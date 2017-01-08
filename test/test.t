@@ -11,24 +11,18 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # 3ALJ - Block seq in seq
 # 57H4 - Various block tags
 # 5BVJ - Simple literal and folded
-# 6FWR - Top level literal w/ +
-# 6JQW - Top level literal scalar
 # 6JWB - Various block tags
 # 6VJK - Top level folded
-# 77H8 - Block map with tags and literal values
 # 7BUB - Block seq in map with comments and anchor/alias
 # 7T8X - Top level folded scalar
 # 93JH - Simple block seq of map
 # 96L6 - Top level folded scalar
 # 9U5K - Simple block seq of map
-# A6F9 - Simple map of literals
-# AZW3 - Simple block sew of map
-# C2DT - Flow map with empty value
+# AZW3 - Simple block seq of map
+# C2DT - Flow map with empty value (has "x":x)
 # DWX9 - Top level literal
-# F8F9 - Block map of literals with various comments
 # G4RS - Unicode and other escapes
 # G992 - Top level folded scalar
-# H2RW - Simple map with a literal
 # HMK4 - Map with fold and literal
 # J7PZ - Map in seq with top level tag
 # J9HZ - Simple seq in map, but comments in a couple places
@@ -37,10 +31,7 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # K858 - Map of empty folded and literal
 # KZN9 - Seq of flow seq with interesting values
 # L9U5 - Flow seq with pair
-# M29M - Map with literal
-# M9B4 - Top level literal
 # MJS9 - Top level folded
-# MYW6 - Top level literal w/ '-'
 # MZX3 - Seq of various scalar styles
 # NP9H - \$ in double quoted string
 # P2AD - Seq of folded and literal
@@ -55,7 +46,6 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # - empty keys and values
 # - empty documents
 # - map in seq
-# - literal scalars
 # - folded scalars
 # - multiline plain scalars
 # - explicit key '?'
