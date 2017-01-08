@@ -20,7 +20,6 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # 9U5K - Simple block seq of map
 # AZW3 - Simple block seq of map
 # C2DT - Flow map with empty value (has "x":x)
-# DWX9 - Top level literal
 # G4RS - Unicode and other escapes
 # G992 - Top level folded scalar
 # HMK4 - Map with fold and literal

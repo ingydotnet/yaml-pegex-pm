@@ -176,15 +176,13 @@ flow-mapping-end: /- '}' SPACE*/
 # It needs access to the indent level.
 
 # Folded scalar.
-# XXX Dummied out for now.
-folded-scalar: / '>' EOL 'XXX' /
+# folded-scalar: # This rule is written in code in the Grammar class.
+# It needs access to the indent level.
 
 # Double quoted scalar.
-# XXX Needs work.
 double-quoted-scalar: / DOUBLE ((: BACK DOUBLE | [^ DOUBLE])*) DOUBLE /
 
 # Single quoted scalar.
-# XXX Needs work.
 single-quoted-scalar: / SINGLE ((: SINGLE SINGLE | [^ SINGLE])*) SINGLE /
 
 # Plain (unquoted) scalars can't start with syntax chars, and can't contain

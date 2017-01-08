@@ -84,11 +84,20 @@ sub rule_block_undent {
     return;
 }
 
+sub rule_folded_scalar {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indent = $self->{indent}[-1] + 1;
+    my $pad = 0;
+    my $chomp = 0;
+    my $keep = 0;
+    pos($$buffer) = $pos;
+    return;
+    $$buffer =~ /\G\|(\d*[-+]?)?$EOL/g or return;
+}
+
 sub rule_literal_scalar {
     my ($self, $parser, $buffer, $pos) = @_;
-    my $indent = $self->{indent};
-    return unless @$indent;
-    $indent = $indent->[-1] + 1;
+    my $indent = $self->{indent}[-1] + 1;
     my $pad = 0;
     my $chomp = 0;
     my $keep = 0;
@@ -109,8 +118,12 @@ sub rule_literal_scalar {
     /gx) {
         my $line = " $1";
         if (not $pad) {
-            $line =~ s/^(\ +)// or die;
-            $pad = length $1;
+            if ($line =~ s/^(\ +)(?=\S)//) {
+                $pad = length $1;
+            }
+            else {
+                $line = "\n";
+            }
         }
         else {
             if ($line !~ s/^\ {$pad}//) {
@@ -126,14 +139,14 @@ sub rule_literal_scalar {
     $parser->match_rule(--$pos, [$value]);
 }
 
-sub make_tree {
-    use Pegex::Bootstrap;
-    use IO::All;
-    my $grammar = io->file(file)->all;
-    Pegex::Bootstrap->new->compile($grammar)->tree;
-}
-sub make_treeXXX {
-# sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
+# sub make_tree {
+#     use Pegex::Bootstrap;
+#     use IO::All;
+#     my $grammar = io->file(file)->all;
+#     Pegex::Bootstrap->new->compile($grammar)->tree;
+# }
+# sub make_treeXXX {
+sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
   {
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
@@ -142,7 +155,21 @@ sub make_treeXXX {
       '.rgx' => qr/\G\r?\n/
     },
     'block_key' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z):(?:\ +|\ *(?=\r?\n))/
+      '.all' => [
+        {
+          '+max' => 1,
+          '.ref' => 'yaml_prefix'
+        },
+        {
+          '.ref' => 'block_key_scalar'
+        },
+        {
+          '.ref' => 'block_mapping_separator'
+        }
+      ]
+    },
+    'block_key_scalar' => {
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
     },
     'block_mapping' => {
       '.all' => [
@@ -206,8 +233,65 @@ sub make_treeXXX {
         }
       ]
     },
+    'block_mapping_separator' => {
+      '.rgx' => qr/\G:(?:\ +|\ *(?=\r?\n))/
+    },
+    'block_node' => {
+      '.any' => [
+        {
+          '.ref' => 'block_sequence'
+        },
+        {
+          '.ref' => 'block_mapping'
+        },
+        {
+          '.all' => [
+            {
+              '+max' => 1,
+              '.ref' => 'yaml_prefix'
+            },
+            {
+              '.ref' => 'block_scalar'
+            }
+          ]
+        }
+      ]
+    },
     'block_plain_scalar' => {
       '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
+    },
+    'block_prefix' => {
+      '.all' => [
+        {
+          '.any' => [
+            {
+              '.all' => [
+                {
+                  '.ref' => 'yaml_anchor'
+                },
+                {
+                  '+max' => 1,
+                  '.ref' => 'yaml_tag'
+                }
+              ]
+            },
+            {
+              '.all' => [
+                {
+                  '.ref' => 'yaml_tag'
+                },
+                {
+                  '+max' => 1,
+                  '.ref' => 'yaml_anchor'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          '.rgx' => qr/\G(?=\r?\n)/
+        }
+      ]
     },
     'block_scalar' => {
       '.any' => [
@@ -406,17 +490,11 @@ sub make_treeXXX {
     'flow_sequence_start' => {
       '.rgx' => qr/\G\s*\[\s*/
     },
-    'folded_scalar' => {
-      '.rgx' => qr/\G\>\r?\nXXX/
-    },
     'ignore_line' => {
       '.rgx' => qr/\G(?:[\ \t]*\#.*|[\ \t]*)(?=\r?\n)/
     },
     'list_separator' => {
       '.rgx' => qr/\G\s*,\s*/
-    },
-    'literal_scalar' => {
-      '.rgx' => qr/\G\|\r?\nXXX/
     },
     'single_quoted_scalar' => {
       '.rgx' => qr/\G'((?:''|[^'])*)'/
@@ -490,17 +568,19 @@ sub make_treeXXX {
                 },
                 {
                   '.ref' => 'flow_mapping'
-                },
-                {
-                  '.ref' => 'block_sequence'
-                },
-                {
-                  '.ref' => 'block_mapping'
-                },
-                {
-                  '.ref' => 'block_scalar'
                 }
               ]
+            }
+          ]
+        },
+        {
+          '.all' => [
+            {
+              '+max' => 1,
+              '.ref' => 'block_prefix'
+            },
+            {
+              '.ref' => 'block_node'
             }
           ]
         }
@@ -564,8 +644,24 @@ sub make_treeXXX {
               '.ref' => 'yaml_document'
             },
             {
-              '+min' => 0,
-              '.ref' => 'ignore_line'
+              '+max' => 1,
+              '.all' => [
+                {
+                  '.ref' => 'ignore_line'
+                },
+                {
+                  '+min' => 0,
+                  '-flat' => 1,
+                  '.all' => [
+                    {
+                      '.ref' => 'EOL'
+                    },
+                    {
+                      '.ref' => 'ignore_line'
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
