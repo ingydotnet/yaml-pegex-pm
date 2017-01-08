@@ -139,13 +139,14 @@ sub rule_literal_scalar {
     $parser->match_rule(--$pos, [$value]);
 }
 
-# sub make_tree {
-#     use Pegex::Bootstrap;
-#     use IO::All;
-#     my $grammar = io->file(file)->all;
-#     Pegex::Bootstrap->new->compile($grammar)->tree;
-# }
-# sub make_treeXXX {
+# Set YAML_PEGEX_DEV=1 to make grammar compile every time
+sub make_tree_dynamic {
+    use Pegex::Bootstrap;
+    use IO::All;
+    my $grammar = io->file(file)->all;
+    Pegex::Bootstrap->new->compile($grammar)->tree;
+}
+
 sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
   {
     '+grammar' => 'yaml',
@@ -621,6 +622,11 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
       '.rgx' => qr/\G(\!\S*)\s*/
     }
   }
+}
+
+{
+    no warnings 'redefine';
+    *make_tree = \&make_tree_dynamic if $ENV{YAML_PEGEX_DEV};
 }
 
 1;
