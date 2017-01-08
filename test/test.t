@@ -15,7 +15,6 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # 93JH - Simple block seq of map
 # 9U5K - Simple block seq of map
 # AZW3 - Simple block seq of map
-# C2DT - Flow map with empty value (has "x":x)
 # G4RS - Unicode and other escapes
 # J7PZ - Map in seq with top level tag
 # J9HZ - Simple seq in map, but comments in a couple places

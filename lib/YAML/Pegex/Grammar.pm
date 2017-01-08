@@ -179,7 +179,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
         {
           '.all' => [
             {
-              '.ref' => 'block_mapping_pair'
+              '.ref' => 'block_pair'
             },
             {
               '+min' => 0,
@@ -189,7 +189,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
                   '.ref' => 'ignore_lines'
                 },
                 {
-                  '.ref' => 'block_mapping_pair'
+                  '.ref' => 'block_pair'
                 }
               ]
             },
@@ -201,19 +201,6 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
         },
         {
           '.ref' => 'block_undent'
-        }
-      ]
-    },
-    'block_mapping_pair' => {
-      '.all' => [
-        {
-          '.ref' => 'block_ondent'
-        },
-        {
-          '.ref' => 'block_key'
-        },
-        {
-          '.ref' => 'yaml_node'
         }
       ]
     },
@@ -247,6 +234,19 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
               '.ref' => 'block_scalar'
             }
           ]
+        }
+      ]
+    },
+    'block_pair' => {
+      '.all' => [
+        {
+          '.ref' => 'block_ondent'
+        },
+        {
+          '.ref' => 'block_key'
+        },
+        {
+          '.ref' => 'yaml_node'
         }
       ]
     },
@@ -385,10 +385,28 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     'flow_mapping_pair' => {
       '.all' => [
         {
-          '.ref' => 'flow_node'
-        },
-        {
-          '.ref' => 'pair_separator'
+          '.any' => [
+            {
+              '.all' => [
+                {
+                  '.ref' => 'double_quoted_scalar'
+                },
+                {
+                  '.ref' => 'pair_separator_json'
+                }
+              ]
+            },
+            {
+              '.all' => [
+                {
+                  '.ref' => 'flow_node'
+                },
+                {
+                  '.ref' => 'pair_separator'
+                }
+              ]
+            }
+          ]
         },
         {
           '.ref' => 'flow_node'
@@ -427,7 +445,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
       ]
     },
     'flow_plain_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?=[&\*\{\}\[\]%"',]|:\ |,\ |\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?=[&\*\{\}\[\]%"',]|:\ |,\ |\r?\n|\z)/
     },
     'flow_scalar' => {
       '.any' => [
@@ -490,6 +508,9 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     },
     'pair_separator' => {
       '.rgx' => qr/\G\s*:(?:\ +|\ *(?=\r?\n))/
+    },
+    'pair_separator_json' => {
+      '.rgx' => qr/\G\s*:\ */
     },
     'single_quoted_scalar' => {
       '.rgx' => qr/\G'((?:''|[^'])*)'/
