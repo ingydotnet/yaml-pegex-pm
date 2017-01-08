@@ -109,6 +109,14 @@ sub got_literal_scalar {
     $self->send(SCALAR => "|$got");
 }
 
+sub got_folded_scalar {
+    my ($self, $got) = @_;
+    $got =~ s/\\/\\\\/g;
+    $got =~ s/\t/\\t/g;
+    $got =~ s/\n/\\n/g;
+    $self->send(SCALAR => ">$got");
+}
+
 sub got_block_key_scalar {
     my ($self, $got) = @_;
     my @args = (":$got");
@@ -133,7 +141,7 @@ sub got_block_key {
     $self->send(SCALAR => @{delete($self->{block_key_scalar})});
 }
 
-sub got_block_indent_sequence {
+sub got_block_sequence_indent {
     my ($self) = (shift);
     $self->{kind}[++$self->{level}] = 'sequence';
     $self->send('SEQUENCE_START');

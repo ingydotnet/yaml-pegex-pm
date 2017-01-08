@@ -19,34 +19,10 @@ my $NOTHING = qr//;
 
 sub rule_block_indent {
     my ($self, $parser, $buffer, $pos) = @_;
-    return if $pos >= length($$buffer);
     my $indent = $self->{indent};
     pos($$buffer) = $pos;
-    if ($pos == 0) {
-        $$buffer =~ /\G($SPACE*)$NONSPACE/g or die;
-        push @$indent, length($1);
-        return $parser->match_rule($pos);
-    }
-    my $len = $indent->[-1] + 1;
-    $$buffer =~ /\G$EOL(${SPACE}{$len,})$NONSPACE/g or return;
-    push @$indent, length($1);
-    return $parser->match_rule($pos);
-}
-
-sub rule_block_indent_sequence {
-    my ($self, $parser, $buffer, $pos) = @_;
-    return if $pos >= length($$buffer);
-    my $indent = $self->{indent};
-    pos($$buffer) = $pos;
-    if ($pos == 0) {
-        $$buffer =~ /\G($SPACE*)$DASHSPACE/g or return;
-        push @$indent, length($1);
-        return $parser->match_rule($pos);
-    }
-    my $len = 0;
-    $len = $indent->[-1];
-    $len++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
-    $$buffer =~ /\G$EOL(${SPACE}{$len,})$DASHSPACE/g or return;
+    my $count = $indent->[-1] + 1;
+    $$buffer =~ /\G(?:\A|$EOL)(${SPACE}{$count,})$NONSPACE/g or return;
     push @$indent, length($1);
     return $parser->match_rule($pos);
 }
@@ -54,20 +30,10 @@ sub rule_block_indent_sequence {
 sub rule_block_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
-    my $len = $indent->[-1];
+    my $count = $indent->[-1];
     my $RE = $pos > 0 ? $EOL : $NOTHING;
     pos($$buffer) = $pos;
-    $$buffer =~ /\G$RE(${SPACE}{$len})$NONSPACE/g or return;
-    return $parser->match_rule(pos($$buffer));
-}
-
-sub rule_block_ondent_sequence {
-    my ($self, $parser, $buffer, $pos) = @_;
-    my $indent = $self->{indent};
-    my $len = $indent->[-1];
-    my $RE = $pos > 0 ? $EOL : $NOTHING;
-    pos($$buffer) = $pos;
-    $$buffer =~ /\G$RE(${SPACE}{$len})$DASHSPACE/g or return;
+    $$buffer =~ /\G$RE(${SPACE}{$count})$NONSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
 }
 
@@ -75,24 +41,69 @@ sub rule_block_undent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
     return unless @$indent;
-    my $len = $indent->[-1];
+    my $count = $indent->[-1];
     pos($$buffer) = $pos;
-    if ($$buffer =~ /\G$EOD|(?!$EOL {$len})/g) {
-        pop @$indent;
-        return $parser->match_rule($pos);
-    }
-    return;
+    return unless $$buffer =~ /\G$EOD|(?!$EOL {$count})/g;
+    pop @$indent;
+    return $parser->match_rule($pos);
+}
+
+sub rule_block_sequence_indent {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indent = $self->{indent};
+    pos($$buffer) = $pos;
+    my $count = $indent->[-1];
+    $count++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
+    $$buffer =~ /\G(?:\A|$EOL)(${SPACE}{$count,})$DASHSPACE/g or return;
+    push @$indent, length($1);
+    return $parser->match_rule($pos);
+}
+
+sub rule_block_sequence_ondent {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indent = $self->{indent};
+    my $count = $indent->[-1];
+    my $RE = $pos > 0 ? $EOL : $NOTHING;
+    pos($$buffer) = $pos;
+    $$buffer =~ /\G$RE(${SPACE}{$count})$DASHSPACE/g or return;
+    return $parser->match_rule(pos($$buffer));
 }
 
 sub rule_folded_scalar {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent}[-1] + 1;
-    my $pad = 0;
     my $chomp = 0;
     my $keep = 0;
     pos($$buffer) = $pos;
-    return;
-    $$buffer =~ /\G\|(\d*[-+]?)?$EOL/g or return;
+    $$buffer =~ /\G\>([-+]?)?$EOL/g or return;
+    my $ind = $1;
+    $chomp = 1 if $ind =~ /\-/;
+    $keep = 1 if $ind =~ /\+/;
+    $pos = pos($$buffer);
+    my $value = '';
+    my $pad = 0;
+    while ($$buffer =~ /\G(?:\ {$indent}|\ *(?=\n))(.*\n)/g) {
+        my $line = " $1";
+        if (not $pad) {
+            $line =~ s/^(\ +)(?=\S)//
+                ? ($pad = length $1)
+                : ($line = "\n");
+        }
+        elsif ($line !~ s/^\ {$pad}//) {
+            last if $line =~ /\S/;
+            $line = "\n";
+        }
+        $value .= $line;
+        $pos = pos($$buffer);
+    }
+    # $value =~ s/ /_/g;
+    # XXX ">>\n$value<<";
+    $value =~ s/(?<=\S)\n(?=\S)/ /g;
+    $value =~ s/(^\ .*\n)(\n+)(?=\S)/$1 . ("\n" x (length($2)+1))/gem;
+    $value =~ s/(?<=\S)(\n+)(?=\S)/"\n" x (length($1) - 1)/ge;
+    $value =~ s/\n+\z/\n/ unless $keep;
+    chomp $value if $chomp;
+    $parser->match_rule(--$pos, [$value]);
 }
 
 sub rule_literal_scalar {
@@ -109,27 +120,16 @@ sub rule_literal_scalar {
     $keep = 1 if $ind =~ /\+/;
     $pos = pos($$buffer);
     my $value = '';
-    while ($$buffer =~ /\G
-        (?:
-            \ {$indent} |
-            \ *(?=\n)
-        )
-        (.*\n)
-    /gx) {
+    while ($$buffer =~ /\G(?:\ {$indent}|\ *(?=\n))(.*\n)/g) {
         my $line = " $1";
         if (not $pad) {
-            if ($line =~ s/^(\ +)(?=\S)//) {
-                $pad = length $1;
-            }
-            else {
-                $line = "\n";
-            }
+            $line =~ s/^(\ +)(?=\S)//
+                ? ($pad = length $1)
+                : ($line = "\n");
         }
-        else {
-            if ($line !~ s/^\ {$pad}//) {
-                last if $line =~ /\S/;
-                $line = "\n";
-            }
+        elsif ($line !~ s/^\ {$pad}//) {
+            last if $line =~ /\S/;
+            $line = "\n";
         }
         $value .= $line;
         $pos = pos($$buffer);
@@ -164,7 +164,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
           '.ref' => 'block_key_scalar'
         },
         {
-          '.ref' => 'block_mapping_separator'
+          '.ref' => 'pair_separator'
         }
       ]
     },
@@ -186,15 +186,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
               '-flat' => 1,
               '.all' => [
                 {
-                  '+min' => 0,
-                  '.all' => [
-                    {
-                      '.ref' => 'EOL'
-                    },
-                    {
-                      '.ref' => 'ignore_line'
-                    }
-                  ]
+                  '.ref' => 'ignore_lines'
                 },
                 {
                   '.ref' => 'block_mapping_pair'
@@ -203,15 +195,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
             },
             {
               '+max' => 1,
-              '+min' => 0,
-              '.all' => [
-                {
-                  '.ref' => 'EOL'
-                },
-                {
-                  '.ref' => 'ignore_line'
-                }
-              ]
+              '.ref' => 'ignore_lines'
             }
           ]
         },
@@ -233,16 +217,25 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
         }
       ]
     },
-    'block_mapping_separator' => {
-      '.rgx' => qr/\G:(?:\ +|\ *(?=\r?\n))/
-    },
     'block_node' => {
       '.any' => [
         {
-          '.ref' => 'block_sequence'
-        },
-        {
-          '.ref' => 'block_mapping'
+          '.all' => [
+            {
+              '+max' => 1,
+              '.ref' => 'block_prefix'
+            },
+            {
+              '.any' => [
+                {
+                  '.ref' => 'block_sequence'
+                },
+                {
+                  '.ref' => 'block_mapping'
+                }
+              ]
+            }
+          ]
         },
         {
           '.all' => [
@@ -263,30 +256,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     'block_prefix' => {
       '.all' => [
         {
-          '.any' => [
-            {
-              '.all' => [
-                {
-                  '.ref' => 'yaml_anchor'
-                },
-                {
-                  '+max' => 1,
-                  '.ref' => 'yaml_tag'
-                }
-              ]
-            },
-            {
-              '.all' => [
-                {
-                  '.ref' => 'yaml_tag'
-                },
-                {
-                  '+max' => 1,
-                  '.ref' => 'yaml_anchor'
-                }
-              ]
-            }
-          ]
+          '.ref' => 'yaml_prefix'
         },
         {
           '.rgx' => qr/\G(?=\r?\n)/
@@ -315,7 +285,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     'block_sequence' => {
       '.all' => [
         {
-          '.ref' => 'block_indent_sequence'
+          '.ref' => 'block_sequence_indent'
         },
         {
           '+min' => 1,
@@ -329,15 +299,18 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     'block_sequence_entry' => {
       '.all' => [
         {
-          '.ref' => 'block_ondent_sequence'
+          '.ref' => 'block_sequence_ondent'
         },
         {
-          '.rgx' => qr/\G\-(?:\ +|\ *(?=\r?\n))/
+          '.ref' => 'block_sequence_marker'
         },
         {
           '.ref' => 'yaml_node'
         }
       ]
+    },
+    'block_sequence_marker' => {
+      '.rgx' => qr/\G\-(?:\ +|(?=\r?\n))/
     },
     'document_end' => {
       '.rgx' => qr/\G/
@@ -353,6 +326,24 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     },
     'double_quoted_scalar' => {
       '.rgx' => qr/\G"((?:\\"|[^"])*)"/
+    },
+    'flow_collection' => {
+      '.all' => [
+        {
+          '+max' => 1,
+          '.ref' => 'yaml_prefix'
+        },
+        {
+          '.any' => [
+            {
+              '.ref' => 'flow_sequence'
+            },
+            {
+              '.ref' => 'flow_mapping'
+            }
+          ]
+        }
+      ]
     },
     'flow_mapping' => {
       '.all' => [
@@ -397,38 +388,39 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
           '.ref' => 'flow_node'
         },
         {
-          '.ref' => 'flow_mapping_separator'
+          '.ref' => 'pair_separator'
         },
         {
           '.ref' => 'flow_node'
         }
       ]
     },
-    'flow_mapping_separator' => {
-      '.rgx' => qr/\G\s*:(?:\ +|\ *(?=\r?\n))/
-    },
     'flow_mapping_start' => {
-      '.rgx' => qr/\G\s*\{\s*/
+      '.rgx' => qr/\G\{\s*/
     },
     'flow_node' => {
-      '.all' => [
+      '.any' => [
         {
-          '+max' => 1,
-          '.ref' => 'yaml_prefix'
+          '.ref' => 'yaml_alias'
         },
         {
-          '.any' => [
+          '.all' => [
             {
-              '.ref' => 'yaml_alias'
+              '+max' => 1,
+              '.ref' => 'yaml_prefix'
             },
             {
-              '.ref' => 'flow_sequence'
-            },
-            {
-              '.ref' => 'flow_mapping'
-            },
-            {
-              '.ref' => 'flow_scalar'
+              '.any' => [
+                {
+                  '.ref' => 'flow_sequence'
+                },
+                {
+                  '.ref' => 'flow_mapping'
+                },
+                {
+                  '.ref' => 'flow_scalar'
+                }
+              ]
             }
           ]
         }
@@ -488,13 +480,16 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
       '.rgx' => qr/\G\s*\]\ */
     },
     'flow_sequence_start' => {
-      '.rgx' => qr/\G\s*\[\s*/
+      '.rgx' => qr/\G\[\s*/
     },
-    'ignore_line' => {
-      '.rgx' => qr/\G(?:[\ \t]*\#.*|[\ \t]*)(?=\r?\n)/
+    'ignore_lines' => {
+      '.rgx' => qr/\G(?:(?:[\ \t]*\#.*|[\ \t]*(?=\r?\n))(?:\r?\n(?:[\ \t]*\#.*|[\ \t]*(?=\r?\n)))*)?/
     },
     'list_separator' => {
       '.rgx' => qr/\G\s*,\s*/
+    },
+    'pair_separator' => {
+      '.rgx' => qr/\G\s*:(?:\ +|\ *(?=\r?\n))/
     },
     'single_quoted_scalar' => {
       '.rgx' => qr/\G'((?:''|[^'])*)'/
@@ -524,19 +519,14 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
           ]
         },
         {
-          '.all' => [
-            {
-              '.ref' => 'yaml_node'
-            },
-            {
-              '+max' => 1,
-              '.ref' => 'EOL'
-            }
-          ]
+          '.ref' => 'yaml_node'
         },
         {
           '+max' => 1,
-          '.ref' => 'ignore_line'
+          '.ref' => 'EOL'
+        },
+        {
+          '.ref' => 'ignore_lines'
         },
         {
           '.any' => [
@@ -556,33 +546,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
           '.ref' => 'yaml_alias'
         },
         {
-          '.all' => [
-            {
-              '+max' => 1,
-              '.ref' => 'yaml_prefix'
-            },
-            {
-              '.any' => [
-                {
-                  '.ref' => 'flow_sequence'
-                },
-                {
-                  '.ref' => 'flow_mapping'
-                }
-              ]
-            }
-          ]
+          '.ref' => 'flow_collection'
         },
         {
-          '.all' => [
-            {
-              '+max' => 1,
-              '.ref' => 'block_prefix'
-            },
-            {
-              '.ref' => 'block_node'
-            }
-          ]
+          '.ref' => 'block_node'
         }
       ]
     },
@@ -618,52 +585,11 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
           '.ref' => 'stream_start'
         },
         {
-          '+max' => 1,
-          '.all' => [
-            {
-              '.ref' => 'ignore_line'
-            },
-            {
-              '+min' => 0,
-              '-flat' => 1,
-              '.all' => [
-                {
-                  '.ref' => 'EOL'
-                },
-                {
-                  '.ref' => 'ignore_line'
-                }
-              ]
-            }
-          ]
+          '.ref' => 'ignore_lines'
         },
         {
           '+min' => 0,
-          '.all' => [
-            {
-              '.ref' => 'yaml_document'
-            },
-            {
-              '+max' => 1,
-              '.all' => [
-                {
-                  '.ref' => 'ignore_line'
-                },
-                {
-                  '+min' => 0,
-                  '-flat' => 1,
-                  '.all' => [
-                    {
-                      '.ref' => 'EOL'
-                    },
-                    {
-                      '.ref' => 'ignore_line'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+          '.ref' => 'yaml_document'
         },
         {
           '.ref' => 'stream_end'
