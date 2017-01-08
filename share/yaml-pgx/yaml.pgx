@@ -47,6 +47,7 @@ yaml-stream:
 # explicit head marker, and may be terminated with an optional explicit foot
 # marker.
 yaml-document:
+  directive-tag*
   (document-head | document-start)
   yaml-node
   EOL? ignore-lines
@@ -68,7 +69,7 @@ block-node:
     | block-sequence
     | block-mapping
   )
-  | yaml-prefix? block-scalar
+  | EOL? yaml-prefix? block-scalar
 
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
@@ -219,10 +220,22 @@ flow-plain-scalar: /
 stream-start: ''
 stream-end: / EOL? /
 
+directive-tag: /
+  EOL?
+  '%TAG' SPACE+
+  BANG ( ANY*) BANG SPACE+
+  ( NS+ ) SPACE*
+  (= EOL)
+/
+
 # A YAML header is 3 dashes followed by spaces or a newline:
 document-head: /
   EOL? '---'
-  (: SPACE+ | (?= EOL))
+  (:
+    ignore-line |
+    SPACE+ |
+    (?= EOL)
+  )
 /
 
 # Implicit document start:

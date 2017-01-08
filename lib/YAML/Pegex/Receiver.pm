@@ -5,6 +5,13 @@ extends 'Pegex::Tree';
 
 has data => {};
 
+sub reset_tags {
+    my ($self) = @_;
+    $self->{tags} = {
+        '' => 'tag:yaml.org,2002:',
+    };
+}
+
 sub setup {
     my ($self) = @_;
 }
@@ -14,6 +21,7 @@ sub initial {
     $self->{stack} = [''];
     $self->{kind} = [''];
     $self->{level} = 0;
+    $self->reset_tags;
 }
 
 sub final {
@@ -31,6 +39,12 @@ sub got_stream_end {
     $self->send('STREAM_END');
 }
 
+sub got_directive_tag {
+    my ($self, $got) = @_;
+    my ($tag, $prefix) = @$got;
+    $self->{tags}->{$tag} = $prefix;
+}
+
 sub got_document_head {
     my ($self) = @_;
     $self->send('DOCUMENT_START', '---');
@@ -44,6 +58,7 @@ sub got_document_start {
 sub got_document_foot {
     my ($self) = @_;
     $self->send('DOCUMENT_END', '...');
+    $self->reset_tags;
 }
 
 sub got_document_end {
@@ -64,7 +79,15 @@ sub got_yaml_anchor {
 
 sub got_yaml_tag {
     my ($self, $tag) = @_;
-    $tag = "tag:yaml.org,2002:$1" if $tag =~ /^!!(.*)/;
+
+    if ($tag =~ m/^!(.*)!(.+)/) {
+        my $key = $1;
+        my $value = $2;
+        if (defined( my $prefix = $self->{tags}->{$key})) {
+            $tag = $prefix . $value;
+        }
+    }
+
     $self->{tag} = $tag;
     return;
 }

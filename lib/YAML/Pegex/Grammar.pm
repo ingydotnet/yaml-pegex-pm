@@ -229,6 +229,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
           '.all' => [
             {
               '+max' => 1,
+              '.ref' => 'EOL'
+            },
+            {
+              '+max' => 1,
               '.ref' => 'yaml_prefix'
             },
             {
@@ -313,6 +317,9 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     'block_sequence_marker' => {
       '.rgx' => qr/\G\-(?:\ +|(?=\r?\n))/
     },
+    'directive_tag' => {
+      '.rgx' => qr/\G\r?\n?%TAG\ +!(.*)!\ +(\S+)\ *(?=\r?\n)/
+    },
     'document_end' => {
       '.rgx' => qr/\G/
     },
@@ -320,7 +327,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
       '.rgx' => qr/\G\.\.\.\r?\n/
     },
     'document_head' => {
-      '.rgx' => qr/\G\r?\n?\-\-\-(?:\ +|(?=\r?\n))/
+      '.rgx' => qr/\G\r?\n?\-\-\-(?:(?:[\ \t]*\#.*|[\ \t]*(?=\r?\n))|\ +|(?=\r?\n))/
     },
     'document_start' => {
       '.rgx' => qr/\G(?=[\s\S]*[^\r?\n])/
@@ -530,6 +537,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     },
     'yaml_document' => {
       '.all' => [
+        {
+          '+min' => 0,
+          '.ref' => 'directive_tag'
+        },
         {
           '.any' => [
             {
