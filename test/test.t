@@ -94,7 +94,21 @@ TestML->new(
             maxparse => $main::MAX,
         );
         # use XXX; XXX($parser->grammar->tree);
-        str $parser->parse($yaml);
+
+        my $events = $parser->parse($yaml);
+        # Remove unnecessary STREAM events
+        if (@$events > 4) {
+            shift @$events;
+            pop @$events;
+        }
+
+        # Remove unnecessary DOCUMENT events
+        if ($events->[0] eq '+DOC' and $events->[-1] eq '-DOC') {
+            shift @$events;
+            pop @$events;
+        }
+
+        str join '', map { "$_\n" } @$events;
     }
 }
 

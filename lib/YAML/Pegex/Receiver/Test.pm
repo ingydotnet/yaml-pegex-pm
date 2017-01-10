@@ -31,22 +31,8 @@ sub final {
     my ($self) = (shift);
     $self->SUPER::final($@);
 
+    return $self->{events};
 
-    my $events = $self->{events};
-
-    # Remove unnecessary STREAM events
-    if (@$events > 4) {
-        shift @$events;
-        pop @$events;
-    }
-
-    # Remove unnecessary DOCUMENT events
-    if ($events->[0] eq '+DOC' and $events->[-1] eq '-DOC') {
-        shift @$events;
-        pop @$events;
-    }
-
-    return join '', map { "$_\n" } @{$self->{events}};
 }
 
 sub send {
