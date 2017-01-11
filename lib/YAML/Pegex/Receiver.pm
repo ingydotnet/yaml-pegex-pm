@@ -18,7 +18,6 @@ sub setup {
 
 sub initial {
     my ($self) = @_;
-    $self->{stack} = [''];
     $self->{kind} = [''];
     $self->{level} = 0;
     $self->reset_tags;
