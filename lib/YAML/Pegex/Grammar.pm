@@ -85,24 +85,34 @@ sub rule_folded_scalar {
     while ($$buffer =~ /\G(?:\ {$indent}|\ *(?=\n))(.*\n)/g) {
         my $line = " $1";
         if (not $pad) {
-            $line =~ s/^(\ +)(?=\S)//
-                ? ($pad = length $1)
-                : ($line = "\n");
+            if ($line =~ s/^(\ +)(?=[^\ \n])//) {
+                $pad = length $1;
+            }
+            else {
+                $line = "\n";
+            }
         }
         elsif ($line !~ s/^\ {$pad}//) {
-            last if $line =~ /\S/;
+            last if $line =~ /[^\ \n]/;
             $line = "\n";
         }
         $value .= $line;
         $pos = pos($$buffer);
     }
-    # $value =~ s/ /_/g;
-    # XXX ">>\n$value<<";
-    $value =~ s/(?<=\S)\n(?=\S)/ /g;
-    $value =~ s/(^\ .*\n)(\n+)(?=\S)/$1 . ("\n" x (length($2)+1))/gem;
-    $value =~ s/(?<=\S)(\n+)(?=\S)/"\n" x (length($1) - 1)/ge;
-    $value =~ s/\n+\z/\n/ unless $keep;
-    chomp $value if $chomp;
+
+    # my $debug = $value;
+    # $debug =~ s/ /_/g;
+    # warn ">>\n$debug<<";
+
+    # Reformat folded value:
+    $value =~ s/^(?=[^\ \n\t])(.+)\n(?=[^\ \n])/$1 /mg;
+    $value =~ s{^(?=[^\ \n\t])(.+)\n(\n+)(?=[^\ \n\t])}
+               {$1 . ("\n" x length($2))}meg;
+
+    if (not $keep) {
+        $value =~ s/\n+\z/\n/;
+        chomp $value if $chomp or $value eq "\n";
+    }
     $parser->match_rule(--$pos, [$value]);
 }
 
@@ -134,8 +144,10 @@ sub rule_literal_scalar {
         $value .= $line;
         $pos = pos($$buffer);
     }
-    $value =~ s/\n+\z/\n/ unless $keep;
-    chomp $value if $chomp;
+    if (not $keep) {
+        $value =~ s/\n+\z/\n/;
+        chomp $value if $chomp or $value eq "\n";
+    }
     $parser->match_rule(--$pos, [$value]);
 }
 

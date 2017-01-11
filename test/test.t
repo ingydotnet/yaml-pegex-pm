@@ -19,15 +19,12 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # J7PZ - Map in seq with top level tag
 # J9HZ - Simple seq in map, but comments in a couple places
 # JQ4R - Map in seq in map
-# K858 - Map of empty folded and literal
 # KZN9 - Seq of flow seq with interesting values
 # L9U5 - Flow seq with pair
-# MJS9 - Top level folded
 # MZX3 - Seq of various scalar styles
 # NP9H - \$ in double quoted string
 # P2AD - Seq of folded and literal
 # QF4Y - Pair in flow seq
-# R4YG - Seq of folded and literal
 # RR7F - Simple ? explicit key
 # UGM3 - Invoice example
 # UT92 - Empty documents
