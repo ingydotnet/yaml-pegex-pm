@@ -1,0 +1,7 @@
+- Add cog id to test labels
+- discuss N782 with flyx in #libyaml
+- Add test for anchored/tagged alias. '&a !a *a' should be invalid
+  an alias is just a point. the referent has the anchor and tag etc.
+- Add tests for errors to test suite
+- Create a html page that shows all the test files and which parsers are
+  succeedig/skipping which files
