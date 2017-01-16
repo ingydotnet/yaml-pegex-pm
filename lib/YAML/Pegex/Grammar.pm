@@ -159,7 +159,7 @@ sub make_tree_dynamic {
     Pegex::Bootstrap->new->compile($grammar)->tree;
 }
 
-sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
+sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
   {
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
@@ -331,6 +331,9 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     },
     'directive_tag' => {
       '.rgx' => qr/\G\r?\n?%TAG\ +!(.*)!\ +(\S+)\ *(?=\r?\n)/
+    },
+    'directive_yaml' => {
+      '.rgx' => qr/\G\r?\n?%YAML\ +1\.2/
     },
     'document_end' => {
       '.rgx' => qr/\G/
@@ -549,6 +552,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.61)
     },
     'yaml_document' => {
       '.all' => [
+        {
+          '+max' => 1,
+          '.ref' => 'directive_yaml'
+        },
         {
           '+min' => 0,
           '.ref' => 'directive_tag'

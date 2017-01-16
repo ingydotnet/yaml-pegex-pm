@@ -47,6 +47,7 @@ yaml-stream:
 # explicit head marker, and may be terminated with an optional explicit foot
 # marker.
 yaml-document:
+  directive-yaml?
   directive-tag*
   (document-head | document-start)
   yaml-node
@@ -219,6 +220,11 @@ flow-plain-scalar: /
 # Trigger stream events:
 stream-start: ''
 stream-end: / EOL? /
+
+directive-yaml: /
+  EOL?
+  '%YAML' SPACE+ '1.2'
+/
 
 directive-tag: /
   EOL?

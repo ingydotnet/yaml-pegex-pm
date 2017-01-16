@@ -43,11 +43,11 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # - flow map with singles
 
 # Test commands:
-# :wa|!time prove -lv test/
-# :wa|!ONLY=V55R prove -lv test/
-# :wa|!DEBUG=1 MAX=0 ONLY=UT92 prove -lv test/ |& less
-# :!perl -Ilib -MYAML::Pegex::Grammar=compile
-# :!./test/list-tests.sh > need
+# :wa|!make test
+# :wa|!make unit DEBUG=1 ONLY=27NA
+# :wa|!make compile
+# :wa|!make list
+# :wa|!make list-all
 
 $main::MAX = $ENV{MAX} // 0;
 $main::DEBUG = $ENV{DEBUG} // 0;
