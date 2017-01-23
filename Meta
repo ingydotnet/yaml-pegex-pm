@@ -26,6 +26,7 @@ devel:
 requires:
   perl: 5.8.1
   Pegex: 0.39
+  IO::All: 0
 
 =zild:
   include_testml: 1
