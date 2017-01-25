@@ -189,7 +189,7 @@ single-quoted-scalar: / SINGLE ((: SINGLE SINGLE | [^ SINGLE])*) SINGLE /
 # colon+space.
 block-plain-scalar: /
   (! char-non-start)
-  ( ANY+? )
+  ( ANY*? )
   (: WS+ comment-line)?
   (= COLON WS | EOL | EOS)
 /

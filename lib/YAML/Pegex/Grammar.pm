@@ -182,7 +182,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_key_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
     },
     'block_mapping' => {
       '.all' => [
@@ -268,7 +268,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_plain_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.+?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
     },
     'block_prefix' => {
       '.all' => [
