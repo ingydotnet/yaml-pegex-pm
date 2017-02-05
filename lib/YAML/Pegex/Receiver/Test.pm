@@ -3,6 +3,8 @@ package YAML::Pegex::Receiver::Test;
 use Pegex::Base;
 extends 'YAML::Pegex::Receiver';
 
+use Encode;
+
 my $stream_start_index = 0;
 my $stream_end_index = 0;
 my $document_start_index = 0;
@@ -33,6 +35,32 @@ sub final {
 
     return $self->{events};
 
+}
+
+sub got_single_quoted_scalar {
+    my ($self, $got) = @_;
+    $got =~ s{((?:[ \t]*\r?\n[ \t]*)+)}{
+        my $c = $1 =~ tr/\n//;
+        $c == 1 ? ' ' : '\n' x ($c - 1);
+    }ge;
+    $got =~ s/''/'/g;
+    $got =~ s/\\/\\\\/g;
+    $self->send(SCALAR => "'$got");
+}
+
+sub got_double_quoted_scalar {
+    my ($self, $got) = @_;
+    $got =~ s{((?:[ \t]*\r?\n[ \t]*)+)}{
+        my $c = $1 =~ tr/\n//;
+        $c == 1 ? ' ' : '\n' x ($c - 1);
+    }ge;
+    $got =~ s/\\"/"/g;
+    $got =~ s/\t/\\t/g;
+    $got =~ s/\\x0d/\\r/g;
+    $got =~ s/\\x0a/\\n/g;
+    #pack('U', 0x263a);
+    $got =~ s/\\u(....)/Encode::encode_utf8(chr(hex($1)))/eg;
+    $self->send(SCALAR => "\"$got");
 }
 
 sub send {
