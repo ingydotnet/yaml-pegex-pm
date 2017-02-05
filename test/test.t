@@ -1,7 +1,7 @@
 use strict; use warnings; no warnings 'once';
 use lib 'inc';
-use lib '../pegex-pm/lib';
-use lib '../testml-pm/lib';
+# use lib '../pegex-pm/lib';
+# use lib '../testml-pm/lib';
 
 use TestML;
 use TestML::Compiler::Lite;
