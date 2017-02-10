@@ -49,8 +49,8 @@ $TestML::Compiler::Lite::point_marker = '\+\+\+';
 # :wa|!make list
 # :wa|!make list-all
 
-$main::MAX = $ENV{MAX} // 0;
 $main::DEBUG = $ENV{DEBUG} // 0;
+$main::MAX = $ENV{MAX} // $main::DEBUG ? 1000 : 0;
 $ENV{ONLY} ||= '';
 
 my @tests = ();
@@ -59,7 +59,12 @@ if ($ENV{ONLY}) {
 }
 else {
     open my $fh, '<', 'test/white-list.txt';
-    @tests = map { chomp; $_ } <$fh>;
+    while ($_ = <$fh>) {
+        chomp;
+        length or last;
+        /^#/ and next;
+        push @tests, $_
+    }
 }
 
 my $testml = join '', <DATA>, map
@@ -84,6 +89,9 @@ TestML->new(
         my ($self, $yaml) = @_;
         $YAML::DumpCode = 1;
         $yaml = $yaml->{value};
+        $yaml =~ s/<SPC>/ /g;
+        $yaml =~ s/<TAB>/\t/g;
+        $yaml =~ s/<NEL>\n\z//;
         my $parser = Pegex::Parser->new(
             grammar => 'YAML::Pegex::Grammar'->new,
             receiver => 'YAML::Pegex::Receiver::Test'->new,
@@ -107,6 +115,14 @@ TestML->new(
 
         str join '', map { "$_\n" } @$events;
     }
+
+    sub normalize {
+        my ($self, $want) = @_;
+        $want = $want->{value};
+        $want =~ s/<SPC>/ /g;
+        $want =~ s/<TAB>/\t/g;
+        str $want;
+    }
 }
 
 __DATA__
@@ -115,5 +131,5 @@ __DATA__
 Diff = 1
 Label = 'YAML to Events - $BlockLabel'
 
-*in-yaml.parse == *test-event
+*in-yaml.parse == *test-event.normalize
 

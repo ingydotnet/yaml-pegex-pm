@@ -39,7 +39,7 @@
 # document. NOTE: Not yet dealing with directives.
 yaml-stream:
   stream-start
-  ignore-lines
+  next-line
   yaml-document*
   stream-end
 
@@ -49,12 +49,23 @@ yaml-stream:
 yaml-document:
   directive-yaml?
   directive-tag*
-  (document-head | document-start)
-  yaml-node
-  EOL? ignore-lines
+  (
+    document-head (
+      / BLANK+ / block-scalar |
+      ignore-line top-node
+    )
+  | document-start
+    top-node
+  )
+  next-line
   (document-foot | document-end)
 
-# A top level node can be quite a few distinct things:
+# A top level node is any node, but not an alias:
+top-node:
+  | flow-collection
+  | block-node
+
+# All the possible node types:
 yaml-node:
   | yaml-alias
   | flow-collection
@@ -66,17 +77,17 @@ yaml-node:
 
 # This rule identifies all the block nodes:
 block-node:
-  block-prefix? (
+  block-prefix? next-line (
     | block-sequence
     | block-mapping
   )
-  | EOL? yaml-prefix? block-scalar
+  | yaml-prefix? block-scalar
 
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
 block-sequence:
   block-sequence-indent
-  block-sequence-entry+
+  block-sequence-entry+ % next-line
   block-undent
 
 block-sequence-entry:
@@ -88,7 +99,7 @@ block-sequence-entry:
 # colon+space:
 block-mapping:
   block-indent
-  block-pair+ %% ignore-lines
+  block-pair+ % next-line
   block-undent
 
 # A block mapping pair is a key / value separated by colon+space:
@@ -219,36 +230,30 @@ flow-plain-scalar: /
 
 # Trigger stream events:
 stream-start: ''
-stream-end: / EOL? /
+stream-end: / EOS /
 
 directive-yaml: /
-  EOL?
-  '%YAML' SPACE+ '1.2'
+  '%YAML' BLANK+ '1.2' next-line
 /
 
 directive-tag: /
-  EOL?
-  '%TAG' SPACE+
+  '%TAG' BLANK+
   BANG ( ANY*) BANG SPACE+
-  ( NS+ ) SPACE*
-  (= EOL)
+  ( NS+ )
+  next-line
 /
 
 # A YAML header is 3 dashes followed by spaces or a newline:
 document-head: /
-  EOL? '---'
-  (:
-    ignore-line |
-    SPACE+ |
-    (?= EOL)
-  )
+  '---'
 /
 
 # Implicit document start:
-document-start: / (= ALL* [^ EOL]) /
+# XXX Needs to assert some actual content. Need to do better than this:
+document-start: / (= next-line ANY) /
 
 # A YAML footer is 3 dots followed by a newline:
-document-foot: / '...' EOL /
+document-foot: / '...' eol /
 
 # Implicit document ending:
 document-end: ''
@@ -262,7 +267,7 @@ yaml-prefix:
 # A block prefix is on its own like before a block map or seq.
 block-prefix:
   yaml-prefix
-  /(= EOL)/
+  eol
 
 # An explicit node tag:
 yaml-tag: / ('!' NS*) -/
@@ -276,11 +281,11 @@ yaml-alias: / '*' ( WORD+ ) /
 
 block-sequence-marker: /
   DASH
-  (: SPACE+ | (= EOL))
+  (: SPACE+ | eol)
 /
 
 # Mapping key / value is always separated by ': ' (colon + space):
-pair-separator: /- ':' (: SPACE+ | SPACE* (= EOL)) /
+pair-separator: /- ':' (: SPACE+ | SPACE* (= eol)) /
 # Double quoted key before ':' needs no following space in flow:
 pair-separator-json: /- ':' SPACE* /
 
@@ -322,24 +327,24 @@ char-non-start: /[
 
 # TODO Need to determine the - and + whitespace rule.
 
-# Ignore comments and whitespace until end of line.
-ignore-lines: /
-  (:
-    ignore-line
-    (: EOL ignore-line)*
-  )?
+# Ignore comments and whitespace until end of line:
+next-line: /
+  ignore-line*
 /
 
-# Ignorable line.
+# Ignorable line:
 ignore-line: /
   (: comment-line | blank-line )
 /
 
-# A '#' starts a comment until end of line.
-comment-line: / BLANK* HASH ANY* /
+# A '#' starts a comment until end of line:
+comment-line: / BLANK* HASH ANY* eol? /
 
-# Spaces and tabs.
-blank-line: / BLANK* (= EOL) /
+# Spaces and tabs:
+blank-line: / BLANK* eol /
+
+# YAML might not have a final newline:
+eol: / (: EOL | EOS ) /
 
 # Vim Helpers, until we get `pegex.vim` mode.
 # vim: set lisp sw=2:

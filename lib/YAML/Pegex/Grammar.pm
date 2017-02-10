@@ -15,14 +15,13 @@ my $SPACE = qr/ /;
 my $DASH = qr/\-/;
 my $DASHSPACE = qr/(?=$DASH\s)/;
 my $NONSPACE = qr/(?=[^\s\#])/;
-my $NOTHING = qr//;
 
 sub rule_block_indent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
     pos($$buffer) = $pos;
     my $count = $indent->[-1] + 1;
-    $$buffer =~ /\G(?:\A|$EOL)(${SPACE}{$count,})$NONSPACE/g or return;
+    $$buffer =~ /\G(${SPACE}{$count,})$NONSPACE/g or return;
     push @$indent, length($1);
     return $parser->match_rule($pos);
 }
@@ -31,9 +30,8 @@ sub rule_block_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
     my $count = $indent->[-1];
-    my $RE = $pos > 0 ? $EOL : $NOTHING;
     pos($$buffer) = $pos;
-    $$buffer =~ /\G$RE(${SPACE}{$count})$NONSPACE/g or return;
+    $$buffer =~ /\G${SPACE}{$count}$NONSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
 }
 
@@ -54,7 +52,7 @@ sub rule_block_sequence_indent {
     pos($$buffer) = $pos;
     my $count = $indent->[-1];
     $count++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
-    $$buffer =~ /\G(?:\A|$EOL)(${SPACE}{$count,})$DASHSPACE/g or return;
+    $$buffer =~ /\G(${SPACE}{$count,})$DASHSPACE/g or return;
     push @$indent, length($1);
     return $parser->match_rule($pos);
 }
@@ -63,9 +61,8 @@ sub rule_block_sequence_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
     my $count = $indent->[-1];
-    my $RE = $pos > 0 ? $EOL : $NOTHING;
     pos($$buffer) = $pos;
-    $$buffer =~ /\G$RE(${SPACE}{$count})$DASHSPACE/g or return;
+    $$buffer =~ /\G${SPACE}{$count}$DASHSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
 }
 
@@ -164,9 +161,6 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
     '+version' => '0.0.1',
-    'EOL' => {
-      '.rgx' => qr/\G\r?\n/
-    },
     'block_key' => {
       '.all' => [
         {
@@ -182,7 +176,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_key_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*(?:\r?\n|\z)?)?(?=:\s|\r?\n|\z)/
     },
     'block_mapping' => {
       '.all' => [
@@ -199,16 +193,12 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
               '-flat' => 1,
               '.all' => [
                 {
-                  '.ref' => 'ignore_lines'
+                  '.ref' => 'next_line'
                 },
                 {
                   '.ref' => 'block_pair'
                 }
               ]
-            },
-            {
-              '+max' => 1,
-              '.ref' => 'ignore_lines'
             }
           ]
         },
@@ -226,6 +216,9 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
               '.ref' => 'block_prefix'
             },
             {
+              '.ref' => 'next_line'
+            },
+            {
               '.any' => [
                 {
                   '.ref' => 'block_sequence'
@@ -239,10 +232,6 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
         },
         {
           '.all' => [
-            {
-              '+max' => 1,
-              '.ref' => 'EOL'
-            },
             {
               '+max' => 1,
               '.ref' => 'yaml_prefix'
@@ -268,7 +257,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_plain_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*(?:\r?\n|\z)?)?(?=:\s|\r?\n|\z)/
     },
     'block_prefix' => {
       '.all' => [
@@ -276,7 +265,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'yaml_prefix'
         },
         {
-          '.rgx' => qr/\G(?=\r?\n)/
+          '.ref' => 'eol'
         }
       ]
     },
@@ -305,8 +294,23 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'block_sequence_indent'
         },
         {
-          '+min' => 1,
-          '.ref' => 'block_sequence_entry'
+          '.all' => [
+            {
+              '.ref' => 'block_sequence_entry'
+            },
+            {
+              '+min' => 0,
+              '-flat' => 1,
+              '.all' => [
+                {
+                  '.ref' => 'next_line'
+                },
+                {
+                  '.ref' => 'block_sequence_entry'
+                }
+              ]
+            }
+          ]
         },
         {
           '.ref' => 'block_undent'
@@ -327,28 +331,31 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_sequence_marker' => {
-      '.rgx' => qr/\G\-(?:\ +|(?=\r?\n))/
+      '.rgx' => qr/\G\-(?:\ +|(?:\r?\n|\z))/
     },
     'directive_tag' => {
-      '.rgx' => qr/\G\r?\n?%TAG\ +!(.*)!\ +(\S+)\ *(?=\r?\n)/
+      '.rgx' => qr/\G%TAG[\ \t]+!(.*)!\ +(\S+)(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*/
     },
     'directive_yaml' => {
-      '.rgx' => qr/\G\r?\n?%YAML\ +1\.2/
+      '.rgx' => qr/\G%YAML[\ \t]+1\.2(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*/
     },
     'document_end' => {
       '.rgx' => qr/\G/
     },
     'document_foot' => {
-      '.rgx' => qr/\G\.\.\.\r?\n/
+      '.rgx' => qr/\G\.\.\.(?:\r?\n|\z)/
     },
     'document_head' => {
-      '.rgx' => qr/\G\r?\n?\-\-\-(?:(?:[\ \t]*\#.*|[\ \t]*(?=\r?\n))|\ +|(?=\r?\n))/
+      '.rgx' => qr/\G\-\-\-/
     },
     'document_start' => {
-      '.rgx' => qr/\G(?=[\s\S]*[^\r?\n])/
+      '.rgx' => qr/\G(?=(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*.)/
     },
     'double_quoted_scalar' => {
       '.rgx' => qr/\G"((?:\\"|[^"])*)"/
+    },
+    'eol' => {
+      '.rgx' => qr/\G(?:\r?\n|\z)/
     },
     'flow_collection' => {
       '.all' => [
@@ -523,14 +530,17 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     'flow_sequence_start' => {
       '.rgx' => qr/\G\[\s*/
     },
-    'ignore_lines' => {
-      '.rgx' => qr/\G(?:(?:[\ \t]*\#.*|[\ \t]*(?=\r?\n))(?:\r?\n(?:[\ \t]*\#.*|[\ \t]*(?=\r?\n)))*)?/
+    'ignore_line' => {
+      '.rgx' => qr/\G(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))/
     },
     'list_separator' => {
       '.rgx' => qr/\G\s*,\s*/
     },
+    'next_line' => {
+      '.rgx' => qr/\G(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*/
+    },
     'pair_separator' => {
-      '.rgx' => qr/\G\s*:(?:\ +|\ *(?=\r?\n))/
+      '.rgx' => qr/\G\s*:(?:\ +|\ *(?=(?:\r?\n|\z)))/
     },
     'pair_separator_json' => {
       '.rgx' => qr/\G\s*:\ */
@@ -539,10 +549,20 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G'((?:''|[^'])*)'/
     },
     'stream_end' => {
-      '.rgx' => qr/\G\r?\n?/
+      '.rgx' => qr/\G\z/
     },
     'stream_start' => {
       '.rgx' => qr/\G/
+    },
+    'top_node' => {
+      '.any' => [
+        {
+          '.ref' => 'flow_collection'
+        },
+        {
+          '.ref' => 'block_node'
+        }
+      ]
     },
     'yaml_alias' => {
       '.rgx' => qr/\G\*(\w+)/
@@ -563,22 +583,50 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
         {
           '.any' => [
             {
-              '.ref' => 'document_head'
+              '.all' => [
+                {
+                  '.ref' => 'document_head'
+                },
+                {
+                  '.any' => [
+                    {
+                      '.all' => [
+                        {
+                          '.rgx' => qr/\G[\ \t]+/
+                        },
+                        {
+                          '.ref' => 'block_scalar'
+                        }
+                      ]
+                    },
+                    {
+                      '.all' => [
+                        {
+                          '.ref' => 'ignore_line'
+                        },
+                        {
+                          '.ref' => 'top_node'
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             },
             {
-              '.ref' => 'document_start'
+              '.all' => [
+                {
+                  '.ref' => 'document_start'
+                },
+                {
+                  '.ref' => 'top_node'
+                }
+              ]
             }
           ]
         },
         {
-          '.ref' => 'yaml_node'
-        },
-        {
-          '+max' => 1,
-          '.ref' => 'EOL'
-        },
-        {
-          '.ref' => 'ignore_lines'
+          '.ref' => 'next_line'
         },
         {
           '.any' => [
@@ -637,7 +685,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'stream_start'
         },
         {
-          '.ref' => 'ignore_lines'
+          '.ref' => 'next_line'
         },
         {
           '+min' => 0,

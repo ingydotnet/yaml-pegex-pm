@@ -3,7 +3,7 @@
 # once things mature. ie Make it a suprepo. At that point this Makefile can go
 # away.
 
-TEST_SUITE_COMMIT ?= 8a19f3c45b88675601c6379332a7b7989cdeb35a
+TEST_SUITE_COMMIT ?= 4f900d0057bd166b89b99725ab3e59962b4581f3
 DEBUG ?= 0
 ONLY ?= XXXX
 
