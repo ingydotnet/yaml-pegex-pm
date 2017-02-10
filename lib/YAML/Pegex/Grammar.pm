@@ -176,7 +176,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_key_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*(?:\r?\n|\z)?)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
     },
     'block_mapping' => {
       '.all' => [
@@ -257,7 +257,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_plain_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*(?:\r?\n|\z)?)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:\s+[\ \t]*\#.*)?(?=:\s|\r?\n|\z)/
     },
     'block_prefix' => {
       '.all' => [
@@ -334,10 +334,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G\-(?:\ +|(?:\r?\n|\z))/
     },
     'directive_tag' => {
-      '.rgx' => qr/\G%TAG[\ \t]+!(.*)!\ +(\S+)(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*/
+      '.rgx' => qr/\G%TAG[\ \t]+!(.*)!\ +(\S+)(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
     },
     'directive_yaml' => {
-      '.rgx' => qr/\G%YAML[\ \t]+1\.2(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*/
+      '.rgx' => qr/\G%YAML[\ \t]+1\.2(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
     },
     'document_end' => {
       '.rgx' => qr/\G/
@@ -349,7 +349,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G\-\-\-/
     },
     'document_start' => {
-      '.rgx' => qr/\G(?=(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*.)/
+      '.rgx' => qr/\G(?=(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*.)/
     },
     'double_quoted_scalar' => {
       '.rgx' => qr/\G"((?:\\"|[^"])*)"/
@@ -531,13 +531,13 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G\[\s*/
     },
     'ignore_line' => {
-      '.rgx' => qr/\G(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))/
+      '.rgx' => qr/\G(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))/
     },
     'list_separator' => {
       '.rgx' => qr/\G\s*,\s*/
     },
     'next_line' => {
-      '.rgx' => qr/\G(?:[\ \t]*\#.*(?:\r?\n|\z)?|[\ \t]*(?:\r?\n|\z))*/
+      '.rgx' => qr/\G(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
     },
     'pair_separator' => {
       '.rgx' => qr/\G\s*:(?:\ +|\ *(?=(?:\r?\n|\z)))/

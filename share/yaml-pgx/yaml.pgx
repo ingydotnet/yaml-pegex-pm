@@ -334,14 +334,14 @@ next-line: /
 
 # Ignorable line:
 ignore-line: /
-  (: comment-line | blank-line )
+  (: (: comment-line | blank-line ) eol )
 /
 
 # A '#' starts a comment until end of line:
-comment-line: / BLANK* HASH ANY* eol? /
+comment-line: / BLANK* HASH ANY* /
 
 # Spaces and tabs:
-blank-line: / BLANK* eol /
+blank-line: / BLANK* /
 
 # YAML might not have a final newline:
 eol: / (: EOL | EOS ) /
