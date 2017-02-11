@@ -87,11 +87,10 @@ block-node:
 # dash+space:
 block-sequence:
   block-sequence-indent
-  block-sequence-entry+ % next-line
+  block-sequence-entry+ % (next-line block-sequence-ondent)
   block-undent
 
 block-sequence-entry:
-  block-sequence-ondent
   block-sequence-marker
   yaml-node
 
@@ -99,12 +98,11 @@ block-sequence-entry:
 # colon+space:
 block-mapping:
   block-indent
-  block-pair+ % next-line
+  block-pair+ % (next-line block-ondent)
   block-undent
 
 # A block mapping pair is a key / value separated by colon+space:
 block-pair:
-  block-ondent
   block-key
   yaml-node
 

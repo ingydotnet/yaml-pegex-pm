@@ -20,18 +20,15 @@ sub rule_block_indent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
     pos($$buffer) = $pos;
-    my $count = $indent->[-1] + 1;
-    $$buffer =~ /\G(${SPACE}{$count,})$NONSPACE/g or return;
-    push @$indent, length($1);
-    return $parser->match_rule($pos);
+    $$buffer =~ /\G${SPACE}{${\($indent->[-1]+1)},}$NONSPACE/g or return;
+    push @$indent, length($&);
+    return $parser->match_rule(pos($$buffer));
 }
 
 sub rule_block_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
-    my $indent = $self->{indent};
-    my $count = $indent->[-1];
     pos($$buffer) = $pos;
-    $$buffer =~ /\G${SPACE}{$count}$NONSPACE/g or return;
+    $$buffer =~ /\G${SPACE}{${\$self->{indent}[-1]}}$NONSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
 }
 
@@ -39,9 +36,8 @@ sub rule_block_undent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
     return unless @$indent;
-    my $count = $indent->[-1];
     pos($$buffer) = $pos;
-    return unless $$buffer =~ /\G$EOD|(?!$EOL {$count})/g;
+    return unless $$buffer =~ /\G$EOD|(?!$EOL {${\$indent->[-1]}})/g;
     pop @$indent;
     return $parser->match_rule($pos);
 }
@@ -52,17 +48,15 @@ sub rule_block_sequence_indent {
     pos($$buffer) = $pos;
     my $count = $indent->[-1];
     $count++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
-    $$buffer =~ /\G(${SPACE}{$count,})$DASHSPACE/g or return;
-    push @$indent, length($1);
-    return $parser->match_rule($pos);
+    $$buffer =~ /\G${SPACE}{$count,}$DASHSPACE/g or return;
+    push @$indent, length($&);
+    return $parser->match_rule(pos($$buffer));
 }
 
 sub rule_block_sequence_ondent {
     my ($self, $parser, $buffer, $pos) = @_;
-    my $indent = $self->{indent};
-    my $count = $indent->[-1];
     pos($$buffer) = $pos;
-    $$buffer =~ /\G${SPACE}{$count}$DASHSPACE/g or return;
+    $$buffer =~ /\G${SPACE}{${\$self->{indent}[-1]}}$DASHSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
 }
 
@@ -193,7 +187,14 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
               '-flat' => 1,
               '.all' => [
                 {
-                  '.ref' => 'next_line'
+                  '.all' => [
+                    {
+                      '.ref' => 'next_line'
+                    },
+                    {
+                      '.ref' => 'block_ondent'
+                    }
+                  ]
                 },
                 {
                   '.ref' => 'block_pair'
@@ -245,9 +246,6 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     },
     'block_pair' => {
       '.all' => [
-        {
-          '.ref' => 'block_ondent'
-        },
         {
           '.ref' => 'block_key'
         },
@@ -303,7 +301,14 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
               '-flat' => 1,
               '.all' => [
                 {
-                  '.ref' => 'next_line'
+                  '.all' => [
+                    {
+                      '.ref' => 'next_line'
+                    },
+                    {
+                      '.ref' => 'block_sequence_ondent'
+                    }
+                  ]
                 },
                 {
                   '.ref' => 'block_sequence_entry'
@@ -319,9 +324,6 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     },
     'block_sequence_entry' => {
       '.all' => [
-        {
-          '.ref' => 'block_sequence_ondent'
-        },
         {
           '.ref' => 'block_sequence_marker'
         },
