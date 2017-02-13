@@ -172,6 +172,9 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
     '+version' => '0.0.1',
+    '__' => {
+      '.rgx' => qr/\G(?:(?:(?:(?=[\ \t])|(?<=\s)|(?<=^))[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
+    },
     'block_key' => {
       '.all' => [
         {
@@ -187,7 +190,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_key_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:[\ \t]+[\ \t]*\#.*|[\ \t]*)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*!\{\}\[\]%"'`\@\#])(.*?)(?:(?:(?=[\ \t])|(?<=\s)|(?<=^))[\ \t]*\#.*|[\ \t]*)(?=:\s|\r?\n|\z)/
     },
     'block_mapping' => {
       '.all' => [
@@ -206,7 +209,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
                 {
                   '.all' => [
                     {
-                      '.ref' => 'next_line'
+                      '.ref' => '__'
                     },
                     {
                       '.ref' => 'block_ondent'
@@ -234,7 +237,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
               '.ref' => 'block_prefix'
             },
             {
-              '.ref' => 'next_line'
+              '.ref' => '__'
             },
             {
               '.any' => [
@@ -272,15 +275,40 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'block_plain_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?:[\ \t]+[\ \t]*\#.*|[\ \t]*)?(?=:\s|\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*!\{\}\[\]%"'`\@\#])(.*?)(?:(?:(?=[\ \t])|(?<=\s)|(?<=^))[\ \t]*\#.*|[\ \t]*)(?=:\s|\r?\n|\z)/
     },
     'block_prefix' => {
-      '.all' => [
+      '.any' => [
         {
-          '.ref' => 'yaml_prefix'
+          '.all' => [
+            {
+              '.ref' => 'yaml_anchor'
+            },
+            {
+              '.rgx' => qr/\G[\ \t]*/
+            },
+            {
+              '+max' => 1,
+              '.ref' => 'yaml_tag'
+            }
+          ]
         },
         {
-          '.ref' => 'eol'
+          '.all' => [
+            {
+              '.ref' => 'yaml_tag'
+            },
+            {
+              '.rgx' => qr/\G[\ \t]*/
+            },
+            {
+              '+max' => 1,
+              '.ref' => 'yaml_anchor'
+            },
+            {
+              '.rgx' => qr/\G[\ \t]*/
+            }
+          ]
         }
       ]
     },
@@ -320,7 +348,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
                 {
                   '.all' => [
                     {
-                      '.ref' => 'next_line'
+                      '.ref' => '__'
                     },
                     {
                       '.ref' => 'block_sequence_ondent'
@@ -353,10 +381,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G\-(?:\ +|(?:\r?\n|\z))/
     },
     'directive_tag' => {
-      '.rgx' => qr/\G%TAG[\ \t]+!(.*)!\ +(\S+)(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
+      '.rgx' => qr/\G%TAG[\ \t]+!(.*)!\ +(\S+)(?:(?:(?:(?=[\ \t])|(?<=\s)|(?<=^))[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
     },
     'directive_yaml' => {
-      '.rgx' => qr/\G%YAML[\ \t]+1\.2(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
+      '.rgx' => qr/\G%YAML[\ \t]+1\.2(?:(?:(?:(?=[\ \t])|(?<=\s)|(?<=^))[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
     },
     'document_end' => {
       '.rgx' => qr/\G/
@@ -368,13 +396,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G\-\-\-/
     },
     'document_start' => {
-      '.rgx' => qr/\G(?=(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*.)/
+      '.rgx' => qr/\G(?=.)/
     },
     'double_quoted_scalar' => {
       '.rgx' => qr/\G"((?:\\"|[^"])*)"/
-    },
-    'eol' => {
-      '.rgx' => qr/\G(?:\r?\n|\z)/
     },
     'flow_collection' => {
       '.all' => [
@@ -494,7 +519,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'flow_plain_scalar' => {
-      '.rgx' => qr/\G(?![&\*\{\}\[\]%"'`\@\#])(.*?)(?=[&\*\{\}\[\]%"',]|:\ |,\ |\r?\n|\z)/
+      '.rgx' => qr/\G(?![&\*!\{\}\[\]%"'`\@\#])(.*?)(?=[&\*!\{\}\[\]%"',]|:\ |,\ |\r?\n|\z)/
     },
     'flow_scalar' => {
       '.any' => [
@@ -549,14 +574,8 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     'flow_sequence_start' => {
       '.rgx' => qr/\G\[\s*/
     },
-    'ignore_line' => {
-      '.rgx' => qr/\G(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))/
-    },
     'list_separator' => {
       '.rgx' => qr/\G\s*,\s*/
-    },
-    'next_line' => {
-      '.rgx' => qr/\G(?:(?:[\ \t]*\#.*|[\ \t]*)(?:\r?\n|\z))*/
     },
     'pair_separator' => {
       '.rgx' => qr/\G\s*:(?:\ +|\ *(?=(?:\r?\n|\z)))/
@@ -587,7 +606,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G\*(\w+)/
     },
     'yaml_anchor' => {
-      '.rgx' => qr/\G\&(\w+)\s*/
+      '.rgx' => qr/\G\&(\w+)/
     },
     'yaml_document' => {
       '.all' => [
@@ -621,7 +640,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
                     {
                       '.all' => [
                         {
-                          '.ref' => 'ignore_line'
+                          '.ref' => '__'
                         },
                         {
                           '.ref' => 'top_node'
@@ -645,7 +664,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           ]
         },
         {
-          '.ref' => 'next_line'
+          '.ref' => '__'
         },
         {
           '.any' => [
@@ -680,8 +699,14 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
               '.ref' => 'yaml_anchor'
             },
             {
+              '.rgx' => qr/\G\s+/
+            },
+            {
               '+max' => 1,
               '.ref' => 'yaml_tag'
+            },
+            {
+              '.rgx' => qr/\G\s*/
             }
           ]
         },
@@ -691,8 +716,14 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
               '.ref' => 'yaml_tag'
             },
             {
+              '.rgx' => qr/\G\s+/
+            },
+            {
               '+max' => 1,
               '.ref' => 'yaml_anchor'
+            },
+            {
+              '.rgx' => qr/\G\s*/
             }
           ]
         }
@@ -704,7 +735,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'stream_start'
         },
         {
-          '.ref' => 'next_line'
+          '.ref' => '__'
         },
         {
           '+min' => 0,
@@ -716,7 +747,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'yaml_tag' => {
-      '.rgx' => qr/\G(\!\S*)\s*/
+      '.rgx' => qr/\G(\!\S*)/
     }
   }
 }
