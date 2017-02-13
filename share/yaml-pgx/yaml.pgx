@@ -52,7 +52,7 @@ yaml-document:
   (
     document-head (
       / BLANK+ / block-scalar |
-      ignore-line top-node
+      / BLANK* / next-line top-node
     )
   | document-start
     top-node
@@ -76,12 +76,13 @@ yaml-node:
 #------------------------------------------------------------------------------
 
 # This rule identifies all the block nodes:
-block-node:
-  block-prefix? next-line (
-    | block-sequence
-    | block-mapping
-  )
-  | yaml-prefix? block-scalar
+block-node: (
+  | block-prefix? next-line (
+      | block-sequence
+      | block-mapping
+    )
+  | block-prefix? block-scalar
+)
 
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
@@ -171,10 +172,10 @@ flow-mapping-pair:
   flow-node
 
 # Starting and ending rules for flow collections:
-flow-sequence-start: / '[' -/
-flow-sequence-end: /- ']' SPACE* /
-flow-mapping-start: / '{' -/
-flow-mapping-end: /- '}' SPACE* /
+flow-sequence-start: / '[' WS*/
+flow-sequence-end: / WS* ']' SPACE* /
+flow-mapping-start: / '{' WS*/
+flow-mapping-end: / WS* '}' SPACE* /
 
 #------------------------------------------------------------------------------
 # Scalar Constructs
@@ -257,22 +258,21 @@ document-foot: / '...' eol /
 document-end: ''
 
 # A node prefix is a anchor and / or tag in any order.
-# XXX This construct is hard in PEG. Look for easier way.
 yaml-prefix:
-  | yaml-anchor yaml-tag?
-  | yaml-tag yaml-anchor?
+  | yaml-anchor / WS+/ yaml-tag? / WS*/
+  | yaml-tag / WS+/ yaml-anchor? / WS*/
 
 # A block prefix is on its own like before a block map or seq.
 block-prefix:
-  yaml-prefix
-  eol
+  | yaml-anchor / BLANK*/ yaml-tag? / BLANK*/
+  | yaml-tag / BLANK*/ yaml-anchor? / BLANK*/
 
 # An explicit node tag:
-yaml-tag: / ('!' NS*) -/
+yaml-tag: / ('!' NS*) /
 
 # A Node Anchor is a name for a node. Like '&this'.
 # TODO See spec for real definition.
-yaml-anchor: / '&' ( WORD+ ) -/
+yaml-anchor: / '&' ( WORD+ ) /
 
 # A Node Alias is a reference to an anchored node. Like '*this'.
 yaml-alias: / '*' ( WORD+ ) /
@@ -283,19 +283,20 @@ block-sequence-marker: /
 /
 
 # Mapping key / value is always separated by ': ' (colon + space):
-pair-separator: /- ':' (: SPACE+ | SPACE* (= eol)) /
+pair-separator: / WS* ':' (: SPACE+ | SPACE* (= eol)) /
 # Double quoted key before ':' needs no following space in flow:
-pair-separator-json: /- ':' SPACE* /
+pair-separator-json: / WS* ':' SPACE* /
 
 # List items separated by ',' (comma)
 # XXX Check spec if SPACE is needed
-list-separator: /- ',' -/
+list-separator: / WS* ',' WS*/
 
 # List of single chars that are YAML syntax (and thus must be avoided in
 # various contexts.
 chars-syntax: /
   AMP
   STAR
+  BANG
   LCURLY
   RCURLY
   LSQUARE
