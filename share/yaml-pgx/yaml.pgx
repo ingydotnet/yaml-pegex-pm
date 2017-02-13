@@ -199,7 +199,7 @@ single-quoted-scalar: / SINGLE ((: SINGLE SINGLE | [^ SINGLE])*) SINGLE /
 block-plain-scalar: /
   (! char-non-start)
   ( ANY*? )
-  (: WS+ comment-line)?
+  ignore-to-eol?
   (= COLON WS | EOL | EOS)
 /
 
@@ -334,6 +334,9 @@ next-line: /
 ignore-line: /
   (: (: comment-line | blank-line ) eol )
 /
+
+# Ignore rest of line:
+ignore-to-eol: /(: BLANK+ comment-line | blank-line )/
 
 # A '#' starts a comment until end of line:
 comment-line: / BLANK* HASH ANY* /
