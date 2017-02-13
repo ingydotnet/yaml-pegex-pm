@@ -88,7 +88,7 @@ block-node:
 block-sequence:
   block-sequence-indent
   block-sequence-entry+ % (next-line block-sequence-ondent)
-  block-undent
+  block-sequence-undent
 
 block-sequence-entry:
   block-sequence-marker

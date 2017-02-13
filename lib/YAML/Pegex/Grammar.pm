@@ -8,6 +8,7 @@ extends 'Pegex::Grammar';
 use constant file => './share/yaml-pgx/yaml.pgx';
 
 has indent => [-1];
+has last_seq_indent_pos => 0;
 
 my $EOL = qr/\r?\n/;
 my $EOD = qr/(?:$EOL)?(?=\z|\.\.\.\r?\n|\-\-\-\r?\n)/;
@@ -46,11 +47,17 @@ sub rule_block_sequence_indent {
     my ($self, $parser, $buffer, $pos) = @_;
     my $indent = $self->{indent};
     pos($$buffer) = $pos;
+    my $last_pos = $self->{last_seq_indent_pos};
+    if (substr($$buffer, $last_pos, $pos - $last_pos) =~ /^${DASH}${SPACE}+\z/) {
+        $$buffer =~ /\G${SPACE}*$DASHSPACE/g or return;
+        push @$indent, $indent->[-1] + $pos - $last_pos + length($&);
+        return $parser->match_rule($self->{last_seq_indent_pos} = pos($$buffer));
+    }
     my $count = $indent->[-1];
     $count++ unless $parser->{receiver}{kind}[-1] eq 'mapping';
     $$buffer =~ /\G${SPACE}{$count,}$DASHSPACE/g or return;
     push @$indent, length($&);
-    return $parser->match_rule(pos($$buffer));
+    return $parser->match_rule($self->{last_seq_indent_pos} = pos($$buffer));
 }
 
 sub rule_block_sequence_ondent {
@@ -58,6 +65,16 @@ sub rule_block_sequence_ondent {
     pos($$buffer) = $pos;
     $$buffer =~ /\G${SPACE}{${\$self->{indent}[-1]}}$DASHSPACE/g or return;
     return $parser->match_rule(pos($$buffer));
+}
+
+sub rule_block_sequence_undent {
+    my ($self, $parser, $buffer, $pos) = @_;
+    my $indent = $self->{indent};
+    return unless @$indent;
+    pos($$buffer) = $pos;
+    return unless $$buffer =~ /\G$EOD|(?!$EOL {${\$indent->[-1]}})/g;
+    pop @$indent;
+    return $parser->match_rule($pos);
 }
 
 sub rule_folded_scalar {
@@ -318,7 +335,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           ]
         },
         {
-          '.ref' => 'block_undent'
+          '.ref' => 'block_sequence_undent'
         }
       ]
     },

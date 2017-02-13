@@ -82,6 +82,7 @@ sub got_yaml_tag {
     if ($tag =~ m/^!(.*)!(.+)/) {
         my $key = $1;
         my $value = $2;
+        $value =~ s/%21/!/g;
         if (defined( my $prefix = $self->{tags}->{$key})) {
             $tag = $prefix . $value;
         }
@@ -177,6 +178,13 @@ sub got_block_undent {
     $self->{level}--;
     pop @{$self->{kind}};
     $self->send($event);
+}
+
+sub got_block_sequence_undent {
+    my ($self) = @_;
+    $self->{level}--;
+    pop @{$self->{kind}};
+    $self->send('SEQUENCE_END');
 }
 
 sub got_flow_mapping_start {
