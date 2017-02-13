@@ -54,17 +54,26 @@ $main::MAX = $ENV{MAX} // $main::DEBUG ? 1000 : 0;
 $ENV{ONLY} ||= '';
 
 my @tests = ();
+my $name_id_map = {};
 if ($ENV{ONLY}) {
     @tests = ($ENV{ONLY});
 }
 else {
-    open my $fh, '<', 'test/white-list.txt';
+    open my $fh, '<', 'test/white-list.txt' or die;
     while ($_ = <$fh>) {
         chomp;
         length or last;
-        /^#/ and next;
-        push @tests, $_
+        next if /^#/;
+        push @tests, $_;
     }
+}
+
+for my $id (@tests) {
+    open my $tml, "test/yaml-test-suite/test/$id.tml" or die;
+    my $name = <$tml>;
+    chomp $name;
+    $name =~ s/^=== // or die;
+    $name_id_map->{$name} = $id;
 }
 
 my $testml = join '', <DATA>, map
@@ -87,6 +96,13 @@ TestML->new(
 
     sub parse {
         my ($self, $yaml) = @_;
+        # Hack to get test id in label:
+        my $id;
+        {
+            my $name = $self->runtime->{function}{namespace}{Block}{label};
+            $id = $name_id_map->{$name};
+            $self->runtime->{function}{namespace}{Label}{value} = "($id) $name";
+        }
         $YAML::DumpCode = 1;
         $yaml = $yaml->{value};
         $yaml =~ s/<SPC>/ /g;
@@ -98,9 +114,13 @@ TestML->new(
             debug => $main::DEBUG,
             maxparse => $main::MAX,
         );
-        # use XXX; XXX($parser->grammar->tree);
+        # use XXX; XXX($parser->grammar->tree->{ws});
 
-        my $events = $parser->parse($yaml);
+        my $events;
+        eval {
+            $events = $parser->parse($yaml);
+        } || die "$id parse failure:\n$@";
+
         # Remove unnecessary STREAM events
         if (@$events > 4) {
             shift @$events;
