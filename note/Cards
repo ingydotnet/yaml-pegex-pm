@@ -1,7 +1,24 @@
-- Add cog id to test labels
 - discuss N782 with flyx in #libyaml
 - Add test for anchored/tagged alias. '&a !a *a' should be invalid
   an alias is just a point. the referent has the anchor and tag etc.
 - Add tests for errors to test suite
 - Create a html page that shows all the test files and which parsers are
   succeeding/skipping which files
+
+== Next
+- Should be close to working
+  - 6JWB 6ZKB 87E4 93JH 9U5K 9WXW
+
+- Null scalar values
+  - 2SXE 4ABK
+
+- ? explicit keys
+  - 2XXW 35KP 5WE3 7W2P 8KHE
+
+- Multiline plain
+  - 4CQQ 4ZYM 8UDB(flow)
+
+- Next line start scalar (needs indent)
+  - 565N 5GBF 5NYZ 735Y 7FWL
+
+

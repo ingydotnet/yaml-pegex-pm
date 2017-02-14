@@ -171,7 +171,7 @@ flow-mapping-pair:
   flow-node
 
 # Starting and ending rules for flow collections:
-flow-sequence-start: / '[' WS*/
+flow-sequence-start: / '[' x/
 flow-sequence-end: / WS* ']' SPACE* /
 flow-mapping-start: / '{' WS*/
 flow-mapping-end: / WS* '}' SPACE* /
@@ -208,6 +208,7 @@ block-plain-scalar: /
 flow-plain-scalar: /
   (! char-non-start)
   ( ANY*? )
+  -
   (= [ chars-syntax COMMA ] | COLON SPACE | COMMA SPACE | EOL | EOS)
 /
 
@@ -287,7 +288,7 @@ pair-separator-json: / WS* ':' SPACE* /
 
 # List items separated by ',' (comma)
 # XXX Check spec if SPACE is needed
-list-separator: / WS* ',' WS*/
+list-separator: / x ',' x /
 
 # List of single chars that are YAML syntax (and thus must be avoided in
 # various contexts.
@@ -343,6 +344,11 @@ ws1: /
 # Definition of the + rule.
 # Skip whitespace and comment lines:
 ws2: /(: ws1 eol)*/
+
+# 'x' is ws rule to eat blanks after ws2:
+x: /+ BLANK*/
+
+ws: 'XXX'
 
 # A '#' starts a comment until end of line:
 comment-line: / BLANK* HASH ANY* /
