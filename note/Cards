@@ -1,11 +1,12 @@
-- discuss N782 with flyx in #libyaml
-- Add test for anchored/tagged alias. '&a !a *a' should be invalid
-  an alias is just a point. the referent has the anchor and tag etc.
+== Big Concepts to handle
+- Only parse a prefix once.
+- Parse and stack anything that could be a key.
+  - ': ' starts an implicit mapping.
 - Add tests for errors to test suite
-- Create a html page that shows all the test files and which parsers are
-  succeeding/skipping which files
+  - Add test for anchored/tagged alias. '&a !a *a' should be invalid
+    an alias is just a point. the referent has the anchor and tag etc.
 
-== Next
+== Tests and Conditions to handle
 - Should be close to working
   - 6JWB 6ZKB 87E4 93JH 9U5K 9WXW
 
@@ -21,4 +22,5 @@
 - Next line start scalar (needs indent)
   - 565N 5GBF 5NYZ 735Y 7FWL
 
-
+== Tests to discuss
+- discuss N782 with flyx in #libyaml
