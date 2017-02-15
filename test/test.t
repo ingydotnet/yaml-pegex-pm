@@ -121,18 +121,6 @@ TestML->new(
             $events = $parser->parse($yaml);
         } || die "$id parse failure:\n$@";
 
-        # Remove unnecessary STREAM events
-        if (@$events > 4) {
-            shift @$events;
-            pop @$events;
-        }
-
-        # Remove unnecessary DOCUMENT events
-        if ($events->[0] eq '+DOC' and $events->[-1] eq '-DOC') {
-            shift @$events;
-            pop @$events;
-        }
-
         str join '', map { "$_\n" } @$events;
     }
 
