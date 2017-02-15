@@ -51,7 +51,7 @@ yaml-document:
   directive-tag*
   (
     document-head (
-      / BLANK+ / block-scalar |
+      / BLANK+/ block-scalar + |
       + top-node
     )
   | document-start
@@ -172,9 +172,9 @@ flow-mapping-pair:
 
 # Starting and ending rules for flow collections:
 flow-sequence-start: / '[' x/
-flow-sequence-end: / WS* ']' SPACE* /
-flow-mapping-start: / '{' WS*/
-flow-mapping-end: / WS* '}' SPACE* /
+flow-sequence-end: / x ']' -/
+flow-mapping-start: / '{' x/
+flow-mapping-end: / x '}' -/
 
 #------------------------------------------------------------------------------
 # Scalar Constructs
@@ -232,20 +232,18 @@ stream-start: ''
 stream-end: / EOS /
 
 directive-yaml: /
-  '%YAML' BLANK+ '1.2' +
+  '%YAML' B - '1.2' +
 /
 
 directive-tag: /
-  '%TAG' BLANK+
-  BANG ( ANY*) BANG SPACE+
+  '%TAG' B -
+  BANG ( ANY*) BANG B -
   ( NS+ )
   +
 /
 
 # A YAML header is 3 dashes followed by spaces or a newline:
-document-head: /
-  '---'
-/
+document-head: '---'
 
 # Implicit document start:
 document-start: / (= ANY) /
@@ -258,37 +256,36 @@ document-end: ''
 
 # A node prefix is a anchor and / or tag in any order.
 yaml-prefix:
-  | yaml-anchor / WS+/ yaml-tag? / WS*/
-  | yaml-tag / WS+/ yaml-anchor? / WS*/
+  | yaml-anchor yaml-tag? x
+  | yaml-tag yaml-anchor? x
 
 # A block prefix is on its own like before a block map or seq.
 block-prefix:
-  | yaml-anchor / BLANK*/ yaml-tag?
-  | yaml-tag / BLANK*/ yaml-anchor? / BLANK*/
+  | yaml-anchor yaml-tag? -
+  | yaml-tag yaml-anchor? -
 
 # An explicit node tag:
-yaml-tag: / ('!' NS*) /
+yaml-tag: / ('!' NS*) -/
 
 # A Node Anchor is a name for a node. Like '&this'.
 # TODO See spec for real definition.
-yaml-anchor: / '&' ( WORD+ ) /
+yaml-anchor: / '&' ( WORD+ ) -/
 
 # A Node Alias is a reference to an anchored node. Like '*this'.
 yaml-alias: / '*' ( WORD+ ) /
 
 block-sequence-marker: /
-  DASH
-  (: SPACE+ | eol)
+  DASH (: B - | + )
 /
 
 # Mapping key / value is always separated by ': ' (colon + space):
-pair-separator: / WS* ':' (: SPACE+ | SPACE* (= eol)) /
+pair-separator: /- ':' (= WS) -/
 # Double quoted key before ':' needs no following space in flow:
-pair-separator-json: / WS* ':' SPACE* /
+pair-separator-json: /- ':' -/
 
 # List items separated by ',' (comma)
 # XXX Check spec if SPACE is needed
-list-separator: / x ',' x /
+list-separator: / x ',' x/
 
 # List of single chars that are YAML syntax (and thus must be avoided in
 # various contexts.
@@ -323,41 +320,33 @@ char-non-start: /[
 # Whitespace Rules:
 #------------------------------------------------------------------------------
 
-# Check that we can start a comment:
-assert-comment-start: /
-  (:
-    (= BLANK)
-    | (?<= WS)
-    | (?<= ^)
-  )
-/
-
-# Definition of the - rule.
-# Skip whitespace and comment to EOL:
+# Definition of the '-' rule.
+# Ignore whitespace and comment up to EOL:
 ws1: /
   (:
-    assert-comment-start comment-line
-    | blank-line
+    BLANK*
+    (:
+      (: (?<= WS) | (?<= ^) )
+      HASH ANY*
+    )?
   )
 /
 
-# Definition of the + rule.
-# Skip whitespace and comment lines:
-ws2: /(: ws1 eol)*/
+# Definition of the '+' rule.
+# Ignore (possibly multiple) comment lines:
+ws2: /(: - eol)*/
 
-# 'x' is ws rule to eat blanks after ws2:
-x: /+ BLANK*/
+# Assert blank (space or tab):
+B: /(= BLANK)/
 
-ws: 'XXX'
-
-# A '#' starts a comment until end of line:
-comment-line: / BLANK* HASH ANY* /
-
-# Spaces and tabs:
-blank-line: / BLANK* /
+# 'x' is ws rule to eat blanks after '+' (ws2):
+x: /+ -/
 
 # YAML might not have a final newline:
 eol: / (: EOL | EOS ) /
+
+# Make sure special 'ws' rule is never used:
+ws: 'XXX'
 
 # Vim Helpers, until we get `pegex.vim` mode.
 # vim: set lisp sw=2:
