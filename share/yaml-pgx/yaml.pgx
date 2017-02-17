@@ -112,7 +112,10 @@ block-key:
   pair-separator
 
 # Alias for different receiver method:
-block-key-scalar: / block-plain-scalar /
+block-key-scalar:
+  | double-quoted-scalar
+  | single-quoted-scalar
+  | block-plain-scalar
 
 # A scalar in block form can take one of these 5 forms:
 block-scalar:
@@ -154,6 +157,10 @@ flow-mapping:
   flow-mapping-pair* %% list-separator
   flow-mapping-end
 
+flow-entry:
+  | json-key flow-node
+  | 'xxx'
+
 # A flow scalar only has 3 basic forms:
 flow-scalar:
   | double-quoted-scalar
@@ -166,7 +173,7 @@ flow-mapping-pair:
   ( json-key | flow-node pair-separator )
   flow-node
 
-json-key: / double-quoted-scalar pair-separator /
+json-key: / double-quoted-scalar COLON (= NS) /
 
 # Starting and ending rules for flow collections:
 flow-sequence-start: / '[' x/
@@ -274,8 +281,6 @@ block-sequence-marker: /
 
 # Mapping key / value is always separated by ': ' (colon + space):
 pair-separator: /- ':' (= WS) -/
-# Double quoted key before ':' needs no following space in flow:
-pair-separator-json: /- ':' -/
 
 # List items separated by ',' (comma)
 list-separator: / x ',' x/

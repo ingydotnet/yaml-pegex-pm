@@ -121,23 +121,23 @@ sub unescape_double {
 
 sub got_block_scalar {
     my ($self, $got) = @_;
-    $self->send(@$got);
+    $self->send(SCALAR => $self->get_props, $got);
 }
 
 sub got_flow_scalar {
     my ($self, $got) = @_;
-    $self->send(@$got);
+    $self->send(SCALAR => $self->get_props, $got);
 }
 
 sub got_block_plain_scalar {
     my ($self, $got) = @_;
-    [SCALAR => $self->get_props, ":$got"];
+    ":$got";
 }
 
 sub got_flow_plain_scalar {
     my ($self, $got) = @_;
     $got =~ s/\ +$//;
-    [SCALAR => $self->get_props, ":$got"];
+    ":$got";
 }
 
 sub got_single_quoted_scalar {
@@ -147,13 +147,13 @@ sub got_single_quoted_scalar {
         $c == 1 ? ' ' : '\n' x ($c - 1);
     }ge;
     $got =~ s/''/'/g;
-    [SCALAR => $self->get_props, "'$got"];
+    "'$got";
 }
 
 sub got_double_quoted_scalar {
     my ($self, $got) = @_;
     $got = $self->unescape_double($got);
-    [SCALAR => $self->get_props, "\"$got"];
+    "\"$got";
 }
 
 sub got_literal_scalar {
@@ -161,7 +161,7 @@ sub got_literal_scalar {
     $got =~ s/\\/\\\\/g;
     $got =~ s/\t/\\t/g;
     $got =~ s/\n/\\n/g;
-    [SCALAR => $self->get_props, "|$got"];
+    "|$got";
 }
 
 sub got_folded_scalar {
@@ -169,12 +169,12 @@ sub got_folded_scalar {
     $got =~ s/\\/\\\\/g;
     $got =~ s/\t/\\t/g;
     $got =~ s/\n/\\n/g;
-    [SCALAR => $self->get_props, ">$got"];
+    ">$got";
 }
 
 sub got_block_key_scalar {
     my ($self, $got) = @_;
-    $self->{block_key} = [SCALAR => ":$got"];
+    $self->{block_key} = $got;
     return;
 }
 
@@ -182,8 +182,7 @@ sub got_block_key {
     my ($self) = @_;
     my $level = @{$self->parser->grammar->{indent}} - 1;
     $self->{level} = $level if $level > $self->{level};
-    my $event = $self->{block_key};
-    splice @$event, 1, 0, $self->get_props(1);
+    my $event = [SCALAR => $self->get_props(1), $self->{block_key}];
     if (not $self->{kind}[$self->{level}]) {
         $self->{kind}[$self->{level}] = 'mapping';
         $self->send('MAPPING_START', $self->get_props);
