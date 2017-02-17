@@ -540,7 +540,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.ref' => 'EOS'
     },
     'stream_start' => {
-      '.ref' => '__'
+      '.rgx' => qr/\G(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*/
     },
     'x' => {
       '.rgx' => qr/\G(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)/
@@ -628,12 +628,19 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'yaml_props'
         },
         {
-          '.ref' => '__'
+          '.rgx' => qr/\G(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*/
         },
         {
           '.any' => [
             {
-              '.ref' => 'flow_collection'
+              '.all' => [
+                {
+                  '.rgx' => qr/\G(?=[\{\[])/
+                },
+                {
+                  '.ref' => 'flow_collection'
+                }
+              ]
             },
             {
               '.ref' => 'block_node'

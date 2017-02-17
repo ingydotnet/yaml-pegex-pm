@@ -59,8 +59,9 @@ yaml-document:
 
 # Any kind of YAML node (except alias):
 yaml-node:
-  yaml-props? + (
-  | flow-collection
+  yaml-props? /+/ (
+  | /(=[ LCURLY LSQUARE])/          # Assertion optimization
+    flow-collection
   | block-node
   )
 
@@ -223,7 +224,7 @@ flow-plain-scalar: /
 #------------------------------------------------------------------------------
 
 # Trigger stream events:
-stream-start: +
+stream-start: /+/
 stream-end: EOS
 
 directive-yaml: /
