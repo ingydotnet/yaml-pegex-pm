@@ -34,12 +34,9 @@
 #------------------------------------------------------------------------------
 
 # A YAML Stream is the top level rule, and accounts for the entirety of the
-# text being parsed. Basically, a stream is a set of zero or more documents,
-# but there can be ignorable comments on either side of an explicitly marked
-# document.
+# text being parsed. Basically, a stream is a set of zero or more documents.
 yaml-stream:
   stream-start
-  +
   yaml-document*
   stream-end
 
@@ -52,25 +49,25 @@ yaml-document:
   (
     document-head (
       / BLANK+/ block-scalar + |
-      + top-node
+      + yaml-node
     )
   | document-start
-    top-node
+    yaml-node
   )
   +
   (document-foot | document-end)
 
-# A top level node is any node, but not an alias:
-top-node:
+# Any kind of YAML node (except alias):
+yaml-node:
   yaml-props? + (
   | flow-collection
   | block-node
   )
 
-# All the possible node types:
-yaml-node:
+# Any kind of YAML node (including alias):
+any-node:
   | yaml-alias
-  | top-node
+  | yaml-node
 
 #------------------------------------------------------------------------------
 # Block Constructs
@@ -89,21 +86,22 @@ block-sequence:
   block-sequence-entry+ % (+ block-sequence-ondent)
   block-sequence-undent
 
+# A block sequence entry is a dash+space followed by any node:
 block-sequence-entry:
   block-sequence-marker
-  yaml-node
+  any-node
 
-# A block mapping is an indented set of key / value pairs separated by
+# A block mapping is an indented set of key/value pairs separated by
 # colon+space:
 block-mapping:
   block-indent
   block-pair+ % (+ block-ondent)
   block-undent
 
-# A block mapping pair is a key / value separated by colon+space:
+# A block mapping pair is a key/value separated by colon+space:
 block-pair:
   block-key
-  yaml-node
+  any-node
 
 # block key scalar, has more limitations than a block value scalar.
 block-key:
@@ -225,8 +223,8 @@ flow-plain-scalar: /
 #------------------------------------------------------------------------------
 
 # Trigger stream events:
-stream-start: ''
-stream-end: / EOS /
+stream-start: +
+stream-end: EOS
 
 directive-yaml: /
   '%YAML' B - '1.2' +
@@ -261,7 +259,6 @@ yaml-props: (
 yaml-tag: / ('!' NS*) -/
 
 # A Node Anchor is a name for a node. Like '&this'.
-# TODO See spec for real definition.
 yaml-anchor: / ('&' WORD+) -/
 
 # A Node Alias is a reference to an anchored node. Like '*this'.
@@ -277,7 +274,6 @@ pair-separator: /- ':' (= WS) -/
 pair-separator-json: /- ':' -/
 
 # List items separated by ',' (comma)
-# XXX Check spec if SPACE is needed
 list-separator: / x ',' x/
 
 # List of single chars that are YAML syntax (and thus must be avoided in

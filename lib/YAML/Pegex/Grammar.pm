@@ -172,8 +172,21 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     '+grammar' => 'yaml',
     '+toprule' => 'yaml_stream',
     '+version' => '0.0.1',
+    'EOS' => {
+      '.rgx' => qr/\G\z/
+    },
     '__' => {
       '.rgx' => qr/\G(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*/
+    },
+    'any_node' => {
+      '.any' => [
+        {
+          '.ref' => 'yaml_alias'
+        },
+        {
+          '.ref' => 'yaml_node'
+        }
+      ]
     },
     'block_key' => {
       '.all' => [
@@ -247,7 +260,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'block_key'
         },
         {
-          '.ref' => 'yaml_node'
+          '.ref' => 'any_node'
         }
       ]
     },
@@ -315,7 +328,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'block_sequence_marker'
         },
         {
-          '.ref' => 'yaml_node'
+          '.ref' => 'any_node'
         }
       ]
     },
@@ -524,31 +537,10 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.rgx' => qr/\G'((?:''|[^'])*)'/
     },
     'stream_end' => {
-      '.rgx' => qr/\G\z/
+      '.ref' => 'EOS'
     },
     'stream_start' => {
-      '.rgx' => qr/\G/
-    },
-    'top_node' => {
-      '.all' => [
-        {
-          '+max' => 1,
-          '.ref' => 'yaml_props'
-        },
-        {
-          '.ref' => '__'
-        },
-        {
-          '.any' => [
-            {
-              '.ref' => 'flow_collection'
-            },
-            {
-              '.ref' => 'block_node'
-            }
-          ]
-        }
-      ]
+      '.ref' => '__'
     },
     'x' => {
       '.rgx' => qr/\G(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)/
@@ -597,7 +589,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
                           '.ref' => '__'
                         },
                         {
-                          '.ref' => 'top_node'
+                          '.ref' => 'yaml_node'
                         }
                       ]
                     }
@@ -611,7 +603,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
                   '.ref' => 'document_start'
                 },
                 {
-                  '.ref' => 'top_node'
+                  '.ref' => 'yaml_node'
                 }
               ]
             }
@@ -633,12 +625,23 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       ]
     },
     'yaml_node' => {
-      '.any' => [
+      '.all' => [
         {
-          '.ref' => 'yaml_alias'
+          '+max' => 1,
+          '.ref' => 'yaml_props'
         },
         {
-          '.ref' => 'top_node'
+          '.ref' => '__'
+        },
+        {
+          '.any' => [
+            {
+              '.ref' => 'flow_collection'
+            },
+            {
+              '.ref' => 'block_node'
+            }
+          ]
         }
       ]
     },
@@ -679,9 +682,6 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
       '.all' => [
         {
           '.ref' => 'stream_start'
-        },
-        {
-          '.ref' => '__'
         },
         {
           '+min' => 0,

@@ -1,7 +1,10 @@
 == Big Concepts to handle
-- Only parse a prefix once.
-- Parse and stack anything that could be a key.
-  - ': ' starts an implicit mapping.
+- Make prefix into one regex
+- block-mapping-or-scalar
+  - Parse and stack anything that could be a key.
+    - ': ' starts an implicit mapping.
+- Rewrite literal-scalar and folded scalar back into grammar
+  - Use updent rule
 - Add tests for errors to test suite
   - Add test for anchored/tagged alias. '&a !a *a' should be invalid
     an alias is just a point. the referent has the anchor and tag etc.
