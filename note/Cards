@@ -1,5 +1,4 @@
 == Big Concepts to handle
-- Make prefix into one regex
 - block-mapping-or-scalar
   - Parse and stack anything that could be a key.
     - ': ' starts an implicit mapping.

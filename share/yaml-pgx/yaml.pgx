@@ -250,19 +250,20 @@ document-foot: / '...' eol /
 document-end: ''
 
 # A node's properties are a anchor and / or tag in any order.
-yaml-props: (
-  | yaml-anchor yaml-tag?
+yaml-props: /
+  (: yaml-anchor yaml-tag?
   | yaml-tag yaml-anchor?
-) /( - + )/
+  ) ( - + )
+/
 
 # An explicit node tag:
-yaml-tag: / ('!' NS*) -/
+yaml-tag: /(:('!' NS*) -)/
 
 # A Node Anchor is a name for a node. Like '&this'.
-yaml-anchor: / ('&' WORD+) -/
+yaml-anchor: /(:'&' ( WORD+) -)/
 
 # A Node Alias is a reference to an anchored node. Like '*this'.
-yaml-alias: / '*' ( WORD+ ) /
+yaml-alias: /'*' ( WORD+) -/
 
 block-sequence-marker: /
   DASH (: B - | + )

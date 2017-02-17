@@ -74,16 +74,9 @@ sub got_yaml_alias {
 
 sub got_yaml_props {
     my ($self, $got) = @_;
-    my ($anchor, $tag, $ws);
-    for my $prop (@{$got->[0]}) {
-        if ($prop =~ /^&(.*)/) {
-            $anchor = $1;
-        }
-        elsif ($prop =~ /^!/) {
-            $tag = $self->resolve_tag($prop);
-        }
-    }
-    $ws = $got->[-1];
+    my $anchor = $got->[0] || $got->[3];
+    my $tag = $self->resolve_tag($got->[1] || $got->[2]);
+    my $ws = $got->[4];
     push @{$self->{props}}, [$anchor, $tag, $ws];
     return;
 }
@@ -101,6 +94,7 @@ sub get_props {
 
 sub resolve_tag {
     my ($self, $tag) = @_;
+    defined $tag or return;
 
     if ($tag =~ m/^!(.*)!(.+)/) {
         my $key = $1;
