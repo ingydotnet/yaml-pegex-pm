@@ -1,4 +1,5 @@
 == Big Concepts to handle
+- Make flow map and seq both a list of entries (pair or node)
 - block-mapping-or-scalar
   - Parse and stack anything that could be a key.
     - ': ' starts an implicit mapping.

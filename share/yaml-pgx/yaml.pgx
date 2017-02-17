@@ -77,7 +77,7 @@ any-node:
 # This rule identifies all the block nodes:
 block-node:
   | block-sequence
-  | block-mapping
+  | block-mapping-or-scalar
   | block-scalar
 
 # A block sequence is an indented set of nodes each starting with a
@@ -94,8 +94,9 @@ block-sequence-entry:
 
 # A block mapping is an indented set of key/value pairs separated by
 # colon+space:
-block-mapping:
+block-mapping-or-scalar:
   block-indent
+  # block-key-or-scalar
   block-pair+ % (+ block-ondent)
   block-undent
 
@@ -162,9 +163,10 @@ flow-scalar:
 # A flow mapping can have any node as key or value, but they must also be in
 # flow syntax.
 flow-mapping-pair:
-  ( double-quoted-scalar pair-separator-json
-  | flow-node pair-separator )
+  ( json-key | flow-node pair-separator )
   flow-node
+
+json-key: / double-quoted-scalar pair-separator /
 
 # Starting and ending rules for flow collections:
 flow-sequence-start: / '[' x/

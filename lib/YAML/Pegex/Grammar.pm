@@ -205,7 +205,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     'block_key_scalar' => {
       '.rgx' => qr/\G(?![&\*!\{\}\[\]%"'`\@\#])(.*?)(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?=:\s|\r?\n|\z)/
     },
-    'block_mapping' => {
+    'block_mapping_or_scalar' => {
       '.all' => [
         {
           '.ref' => 'block_indent'
@@ -247,7 +247,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'block_sequence'
         },
         {
-          '.ref' => 'block_mapping'
+          '.ref' => 'block_mapping_or_scalar'
         },
         {
           '.ref' => 'block_scalar'
@@ -408,14 +408,7 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
         {
           '.any' => [
             {
-              '.all' => [
-                {
-                  '.ref' => 'double_quoted_scalar'
-                },
-                {
-                  '.ref' => 'pair_separator_json'
-                }
-              ]
+              '.ref' => 'json_key'
             },
             {
               '.all' => [
@@ -524,14 +517,14 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
     'flow_sequence_start' => {
       '.rgx' => qr/\G\[(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)/
     },
+    'json_key' => {
+      '.rgx' => qr/\G"((?:\\"|[^"])*)"(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?):(?=\s)(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)/
+    },
     'list_separator' => {
       '.rgx' => qr/\G(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?),(?:(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)(?:\r?\n|\z))*(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)/
     },
     'pair_separator' => {
       '.rgx' => qr/\G(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?):(?=\s)(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)/
-    },
-    'pair_separator_json' => {
-      '.rgx' => qr/\G(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?):(?:[\ \t]*(?:(?:(?<=\s)|(?<=^))\#.*)?)/
     },
     'single_quoted_scalar' => {
       '.rgx' => qr/\G'((?:''|[^'])*)'/

@@ -108,15 +108,36 @@ sub resolve_tag {
     return $tag;
 }
 
+sub unescape_double {
+    my ($self, $string) = @_;
+    $string =~ s{((?:[ \t]*\r?\n[ \t]*)+)}{
+        my $c = $1 =~ tr/\n//;
+        $c == 1 ? ' ' : '\n' x ($c - 1);
+    }ge;
+    $string =~ s/\\"/"/g;
+    $string =~ s/\t/\\t/g;
+    $string;
+}
+
+sub got_block_scalar {
+    my ($self, $got) = @_;
+    $self->send(@$got);
+}
+
+sub got_flow_scalar {
+    my ($self, $got) = @_;
+    $self->send(@$got);
+}
+
 sub got_block_plain_scalar {
     my ($self, $got) = @_;
-    $self->send(SCALAR => $self->get_props, ":$got");
+    [SCALAR => $self->get_props, ":$got"];
 }
 
 sub got_flow_plain_scalar {
     my ($self, $got) = @_;
     $got =~ s/\ +$//;
-    $self->send(SCALAR => $self->get_props, ":$got");
+    [SCALAR => $self->get_props, ":$got"];
 }
 
 sub got_single_quoted_scalar {
@@ -126,18 +147,13 @@ sub got_single_quoted_scalar {
         $c == 1 ? ' ' : '\n' x ($c - 1);
     }ge;
     $got =~ s/''/'/g;
-    $self->send(SCALAR => $self->get_props, "'$got");
+    [SCALAR => $self->get_props, "'$got"];
 }
 
 sub got_double_quoted_scalar {
     my ($self, $got) = @_;
-    $got =~ s{((?:[ \t]*\r?\n[ \t]*)+)}{
-        my $c = $1 =~ tr/\n//;
-        $c == 1 ? ' ' : '\n' x ($c - 1);
-    }ge;
-    $got =~ s/\\"/"/g;
-    $got =~ s/\t/\\t/g;
-    $self->send(SCALAR => $self->get_props, "\"$got");
+    $got = $self->unescape_double($got);
+    [SCALAR => $self->get_props, "\"$got"];
 }
 
 sub got_literal_scalar {
@@ -145,7 +161,7 @@ sub got_literal_scalar {
     $got =~ s/\\/\\\\/g;
     $got =~ s/\t/\\t/g;
     $got =~ s/\n/\\n/g;
-    $self->send(SCALAR => $self->get_props, "|$got");
+    [SCALAR => $self->get_props, "|$got"];
 }
 
 sub got_folded_scalar {
@@ -153,7 +169,7 @@ sub got_folded_scalar {
     $got =~ s/\\/\\\\/g;
     $got =~ s/\t/\\t/g;
     $got =~ s/\n/\\n/g;
-    $self->send(SCALAR => $self->get_props, ">$got");
+    [SCALAR => $self->get_props, ">$got"];
 }
 
 sub got_block_key_scalar {
@@ -173,6 +189,12 @@ sub got_block_key {
         $self->send('MAPPING_START', $self->get_props);
     }
     $self->send(@$event);
+}
+
+sub got_json_key {
+    my ($self, $got) = @_;
+    $got = $self->unescape_double($got);
+    $self->send(SCALAR => $self->get_props, "\"$got");
 }
 
 sub got_block_sequence_indent {
