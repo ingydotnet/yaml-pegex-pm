@@ -4,6 +4,7 @@ use Pegex::Base;
 extends 'Pegex::Tree';
 
 has data => {};
+has props => [];
 
 sub reset_tags {
     my ($self) = @_;
@@ -20,6 +21,7 @@ sub initial {
     my ($self) = @_;
     $self->{kind} = [''];
     $self->{level} = 0;
+    $self->{props} = [];
     $self->reset_tags;
 }
 
@@ -70,13 +72,32 @@ sub got_yaml_alias {
     $self->send(ALIAS => "*$got");
 }
 
-sub got_yaml_anchor {
+sub got_yaml_props {
     my ($self, $got) = @_;
-    $self->{anchor} = $got;
+    my ($anchor, $tag, $ws);
+    for my $prop (@{$got->[0]}) {
+        if ($prop =~ /^&(.*)/) {
+            $anchor = $1;
+        }
+        elsif ($prop =~ /^!/) {
+            $tag = $self->resolve_tag($prop);
+        }
+    }
+    push @{$self->{props}}, [$anchor, $tag, $ws];
     return;
 }
 
-sub got_yaml_tag {
+sub get_props {
+    my ($self) = @_;
+    return () unless @{$self->{props}};
+    my $props = pop @{$self->{props}};
+    my @props = ();
+    push @props, "&$props->[0]" if defined $props->[0];
+    push @props, "<$props->[1]>" if defined $props->[1];
+    return @props;
+}
+
+sub resolve_tag {
     my ($self, $tag) = @_;
 
     if ($tag =~ m/^!(.*)!(.+)/) {
@@ -88,19 +109,18 @@ sub got_yaml_tag {
         }
     }
 
-    $self->{tag} = $tag;
-    return;
+    return $tag;
 }
 
 sub got_block_plain_scalar {
     my ($self, $got) = @_;
-    $self->send(SCALAR => ":$got");
+    $self->send(SCALAR => $self->get_props, ":$got");
 }
 
 sub got_flow_plain_scalar {
     my ($self, $got) = @_;
     $got =~ s/\ +$//;
-    $self->send(SCALAR => ":$got");
+    $self->send(SCALAR => $self->get_props, ":$got");
 }
 
 sub got_single_quoted_scalar {
@@ -110,7 +130,7 @@ sub got_single_quoted_scalar {
         $c == 1 ? ' ' : '\n' x ($c - 1);
     }ge;
     $got =~ s/''/'/g;
-    $self->send(SCALAR => "'$got");
+    $self->send(SCALAR => $self->get_props, "'$got");
 }
 
 sub got_double_quoted_scalar {
@@ -121,7 +141,7 @@ sub got_double_quoted_scalar {
     }ge;
     $got =~ s/\\"/"/g;
     $got =~ s/\t/\\t/g;
-    $self->send(SCALAR => "\"$got");
+    $self->send(SCALAR => $self->get_props, "\"$got");
 }
 
 sub got_literal_scalar {
@@ -129,7 +149,7 @@ sub got_literal_scalar {
     $got =~ s/\\/\\\\/g;
     $got =~ s/\t/\\t/g;
     $got =~ s/\n/\\n/g;
-    $self->send(SCALAR => "|$got");
+    $self->send(SCALAR => $self->get_props, "|$got");
 }
 
 sub got_folded_scalar {
@@ -137,19 +157,12 @@ sub got_folded_scalar {
     $got =~ s/\\/\\\\/g;
     $got =~ s/\t/\\t/g;
     $got =~ s/\n/\\n/g;
-    $self->send(SCALAR => ">$got");
+    $self->send(SCALAR => $self->get_props, ">$got");
 }
 
 sub got_block_key_scalar {
     my ($self, $got) = @_;
-    my @args = (":$got");
-    if (defined $self->{tag}) {
-        unshift @args, '<' . delete($self->{tag}) . '>';
-    }
-    if (defined $self->{anchor}) {
-        unshift @args, '&' . delete $self->{anchor};
-    }
-    $self->{block_key_scalar} = \@args;
+    $self->{block_key} = [SCALAR => ":$got"];
     return;
 }
 
@@ -161,7 +174,9 @@ sub got_block_key {
         $self->{kind}[$self->{level}] = 'mapping';
         $self->send('MAPPING_START');
     }
-    $self->send(SCALAR => @{delete($self->{block_key_scalar})});
+    my $event = $self->{block_key};
+    splice @$event, 1, 0, $self->get_props(1);
+    $self->send(@$event);
 }
 
 sub got_block_sequence_indent {
@@ -190,7 +205,7 @@ sub got_block_sequence_undent {
 sub got_flow_mapping_start {
     my ($self) = @_;
     $self->{kind}[++$self->{level}] = 'mapping';
-    $self->send('MAPPING_START');
+    $self->send('MAPPING_START', $self->get_props);
 }
 
 sub got_flow_mapping_end {
@@ -203,7 +218,7 @@ sub got_flow_mapping_end {
 sub got_flow_sequence_start {
     my ($self) = @_;
     $self->{kind}[++$self->{level}] = 'sequence';
-    $self->send('SEQUENCE_START');
+    $self->send('SEQUENCE_START', $self->get_props);
 }
 
 sub got_flow_sequence_end {

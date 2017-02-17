@@ -36,7 +36,7 @@
 # A YAML Stream is the top level rule, and accounts for the entirety of the
 # text being parsed. Basically, a stream is a set of zero or more documents,
 # but there can be ignorable comments on either side of an explicitly marked
-# document. NOTE: Not yet dealing with directives.
+# document.
 yaml-stream:
   stream-start
   +
@@ -62,14 +62,15 @@ yaml-document:
 
 # A top level node is any node, but not an alias:
 top-node:
+  yaml-props? + (
   | flow-collection
   | block-node
+  )
 
 # All the possible node types:
 yaml-node:
   | yaml-alias
-  | flow-collection
-  | block-node
+  | top-node
 
 #------------------------------------------------------------------------------
 # Block Constructs
@@ -77,11 +78,9 @@ yaml-node:
 
 # This rule identifies all the block nodes:
 block-node:
-  block-prefix? + (
-    | block-sequence
-    | block-mapping
-  )
-  | yaml-prefix? block-scalar
+  | block-sequence
+  | block-mapping
+  | block-scalar
 
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
@@ -108,7 +107,7 @@ block-pair:
 
 # block key scalar, has more limitations than a block value scalar.
 block-key:
-  yaml-prefix?
+  yaml-props?
   block-key-scalar
   pair-separator
 
@@ -130,7 +129,7 @@ block-scalar:
 # A flow node can be an alias or any one of these 3 kinds:
 flow-node:
   yaml-alias |
-  yaml-prefix? (
+  yaml-props? x (
     | flow-sequence
     | flow-mapping
     | flow-scalar
@@ -138,10 +137,8 @@ flow-node:
 
 # A flow collection is just flow map or seq:
 flow-collection:
-  yaml-prefix? (
-    | flow-sequence
-    | flow-mapping
-  )
+  | flow-sequence
+  | flow-mapping
 
 # A flow sequence is zero or more nodes, separated by commas, inside square
 # brackets. A trailing comma is allowed.
@@ -254,22 +251,18 @@ document-foot: / '...' eol /
 # Implicit document ending:
 document-end: ''
 
-# A node prefix is a anchor and / or tag in any order.
-yaml-prefix:
-  | yaml-anchor yaml-tag? x
-  | yaml-tag yaml-anchor? x
-
-# A block prefix is on its own like before a block map or seq.
-block-prefix:
-  | yaml-anchor yaml-tag? -
-  | yaml-tag yaml-anchor? -
+# A node's properties are a anchor and / or tag in any order.
+yaml-props: (
+  | yaml-anchor yaml-tag?
+  | yaml-tag yaml-anchor?
+) /( - + )/
 
 # An explicit node tag:
 yaml-tag: / ('!' NS*) -/
 
 # A Node Anchor is a name for a node. Like '&this'.
 # TODO See spec for real definition.
-yaml-anchor: / '&' ( WORD+ ) -/
+yaml-anchor: / ('&' WORD+) -/
 
 # A Node Alias is a reference to an anchored node. Like '*this'.
 yaml-alias: / '*' ( WORD+ ) /

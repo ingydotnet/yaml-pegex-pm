@@ -8,20 +8,16 @@ use TestML::Compiler::Lite;
 $TestML::Compiler::Lite::point_marker = '\+\+\+';
 
 # Try next:
-# 3ALJ - Block seq in seq
 # 57H4 - Various block tags
 # 6JWB - Various block tags
-# 7BUB - Block seq in map with comments and anchor/alias
 # 93JH - Simple block seq of map
 # 9U5K - Simple block seq of map
 # AZW3 - Simple block seq of map
 # G4RS - Unicode and other escapes
 # J7PZ - Map in seq with top level tag
-# J9HZ - Simple seq in map, but comments in a couple places
 # JQ4R - Map in seq in map
 # KZN9 - Seq of flow seq with interesting values
 # L9U5 - Flow seq with pair
-# MZX3 - Seq of various scalar styles
 # NP9H - \$ in double quoted string
 # P2AD - Seq of folded and literal
 # QF4Y - Pair in flow seq
