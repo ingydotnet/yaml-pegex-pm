@@ -83,13 +83,15 @@ sub got_yaml_props {
             $tag = $self->resolve_tag($prop);
         }
     }
+    $ws = $got->[-1];
     push @{$self->{props}}, [$anchor, $tag, $ws];
     return;
 }
 
 sub get_props {
-    my ($self) = @_;
+    my ($self, $key) = @_;
     return () unless @{$self->{props}};
+    return () if $key and $self->{props}[-1][2] =~ /\n/;
     my $props = pop @{$self->{props}};
     my @props = ();
     push @props, "&$props->[0]" if defined $props->[0];
@@ -170,19 +172,19 @@ sub got_block_key {
     my ($self) = @_;
     my $level = @{$self->parser->grammar->{indent}} - 1;
     $self->{level} = $level if $level > $self->{level};
-    if (not $self->{kind}[$self->{level}]) {
-        $self->{kind}[$self->{level}] = 'mapping';
-        $self->send('MAPPING_START');
-    }
     my $event = $self->{block_key};
     splice @$event, 1, 0, $self->get_props(1);
+    if (not $self->{kind}[$self->{level}]) {
+        $self->{kind}[$self->{level}] = 'mapping';
+        $self->send('MAPPING_START', $self->get_props);
+    }
     $self->send(@$event);
 }
 
 sub got_block_sequence_indent {
     my ($self) = (shift);
     $self->{kind}[++$self->{level}] = 'sequence';
-    $self->send('SEQUENCE_START');
+    $self->send('SEQUENCE_START', $self->get_props);
 }
 
 sub got_block_undent {

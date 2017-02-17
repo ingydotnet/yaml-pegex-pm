@@ -536,6 +536,9 @@ sub make_tree {   # Generated/Inlined by Pegex::Grammar (0.63)
           '.ref' => 'yaml_props'
         },
         {
+          '.ref' => '__'
+        },
+        {
           '.any' => [
             {
               '.ref' => 'flow_collection'
