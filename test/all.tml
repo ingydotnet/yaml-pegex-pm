@@ -1,0 +1,132 @@
+%TestML 0.1.0
+Diff = 1
+Label = 'YAML to Events - $BlockLabel'
+
+*in-yaml.parse == *test-event.normalize
+
+%Include yaml-test-suite/test/229Q.tml
+%Include yaml-test-suite/test/27NA.tml
+%Include yaml-test-suite/test/2AUY.tml
+%Include yaml-test-suite/test/2JQS.tml
+%Include yaml-test-suite/test/3ALJ.tml
+%Include yaml-test-suite/test/3GZX.tml
+%Include yaml-test-suite/test/4GC6.tml
+%Include yaml-test-suite/test/4UYU.tml
+%Include yaml-test-suite/test/54T7.tml
+%Include yaml-test-suite/test/57H4.tml
+%Include yaml-test-suite/test/5BVJ.tml
+%Include yaml-test-suite/test/5C5M.tml
+%Include yaml-test-suite/test/5KJE.tml
+%Include yaml-test-suite/test/5TYM.tml
+%Include yaml-test-suite/test/6CK3.tml
+%Include yaml-test-suite/test/65WH.tml
+%Include yaml-test-suite/test/6FWR.tml
+%Include yaml-test-suite/test/6HB6.tml
+%Include yaml-test-suite/test/6JQW.tml
+%Include yaml-test-suite/test/6JWB.tml
+%Include yaml-test-suite/test/6VJK.tml
+%Include yaml-test-suite/test/74H7.tml
+%Include yaml-test-suite/test/77H8.tml
+%Include yaml-test-suite/test/7A4E.tml
+%Include yaml-test-suite/test/7BUB.tml
+%Include yaml-test-suite/test/7T8X.tml
+%Include yaml-test-suite/test/8G76.tml
+%Include yaml-test-suite/test/8MK2.tml
+%Include yaml-test-suite/test/8QBE.tml
+%Include yaml-test-suite/test/96L6.tml
+%Include yaml-test-suite/test/98YD.tml
+%Include yaml-test-suite/test/9FMG.tml
+%Include yaml-test-suite/test/9J7A.tml
+%Include yaml-test-suite/test/9SHH.tml
+%Include yaml-test-suite/test/A6F9.tml
+%Include yaml-test-suite/test/AVM7.tml
+%Include yaml-test-suite/test/AZ63.tml
+# %Include yaml-test-suite/test/C2DT.tml
+%Include yaml-test-suite/test/CC74.tml
+%Include yaml-test-suite/test/CUP7.tml
+%Include yaml-test-suite/test/D88J.tml
+%Include yaml-test-suite/test/D9TU.tml
+%Include yaml-test-suite/test/DBG4.tml
+%Include yaml-test-suite/test/DHP8.tml
+%Include yaml-test-suite/test/DWX9.tml
+%Include yaml-test-suite/test/EHF6.tml
+%Include yaml-test-suite/test/F2C7.tml
+%Include yaml-test-suite/test/F8F9.tml
+%Include yaml-test-suite/test/FQ7F.tml
+%Include yaml-test-suite/test/FUP4.tml
+%Include yaml-test-suite/test/G992.tml
+%Include yaml-test-suite/test/H2RW.tml
+%Include yaml-test-suite/test/HMK4.tml
+%Include yaml-test-suite/test/J3BT.tml
+%Include yaml-test-suite/test/J9HZ.tml
+%Include yaml-test-suite/test/J5UC.tml
+%Include yaml-test-suite/test/J7VC.tml
+%Include yaml-test-suite/test/JHB9.tml
+%Include yaml-test-suite/test/JS2J.tml
+%Include yaml-test-suite/test/K4SU.tml
+%Include yaml-test-suite/test/K527.tml
+%Include yaml-test-suite/test/K858.tml
+%Include yaml-test-suite/test/KMK3.tml
+%Include yaml-test-suite/test/LE5A.tml
+%Include yaml-test-suite/test/LP6E.tml
+%Include yaml-test-suite/test/M29M.tml
+%Include yaml-test-suite/test/M9B4.tml
+%Include yaml-test-suite/test/MJS9.tml
+%Include yaml-test-suite/test/MXS3.tml
+%Include yaml-test-suite/test/MYW6.tml
+%Include yaml-test-suite/test/MZX3.tml
+%Include yaml-test-suite/test/N782.tml
+%Include yaml-test-suite/test/NHX8.tml
+%Include yaml-test-suite/test/P76L.tml
+%Include yaml-test-suite/test/PBJ2.tml
+%Include yaml-test-suite/test/PRH3.tml
+%Include yaml-test-suite/test/Q88A.tml
+%Include yaml-test-suite/test/R4YG.tml
+%Include yaml-test-suite/test/RLU9.tml
+%Include yaml-test-suite/test/S4JQ.tml
+%Include yaml-test-suite/test/S4T7.tml
+%Include yaml-test-suite/test/SBG9.tml
+%Include yaml-test-suite/test/SYW4.tml
+%Include yaml-test-suite/test/TE2A.tml
+%Include yaml-test-suite/test/TL85.tml
+%Include yaml-test-suite/test/TS54.tml
+%Include yaml-test-suite/test/U3C3.tml
+%Include yaml-test-suite/test/U9NS.tml
+%Include yaml-test-suite/test/UDR7.tml
+%Include yaml-test-suite/test/V55R.tml
+%Include yaml-test-suite/test/X38W.tml
+%Include yaml-test-suite/test/YD5X.tml
+%Include yaml-test-suite/test/Z9M4.tml
+%Include yaml-test-suite/test/ZF4X.tml
+%Include yaml-test-suite/test/ZH7C.tml
+
+# Try next:
+# 57H4 - Various block tags
+# 6JWB - Various block tags
+# 93JH - Simple block seq of map
+# 9U5K - Simple block seq of map
+# AZW3 - Simple block seq of map
+# G4RS - Unicode and other escapes
+# J7PZ - Map in seq with top level tag
+# JQ4R - Map in seq in map
+# KZN9 - Seq of flow seq with interesting values
+# L9U5 - Flow seq with pair
+# NP9H - \$ in double quoted string
+# P2AD - Seq of folded and literal
+# QF4Y - Pair in flow seq
+# RR7F - Simple ? explicit key
+# UGM3 - Invoice example
+# UT92 - Empty documents
+
+# Categories of unsolved problems:
+# - empty keys and values
+# - empty documents
+# - map in seq
+# - folded scalars
+# - multiline plain scalars
+# - explicit key '?'
+# - directives %TAG and %YAML
+# - prefixed block scalar keys
+# - block collection keys
+# - flow seq with pairs
+# - flow map with singles

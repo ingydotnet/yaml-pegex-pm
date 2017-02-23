@@ -1,0 +1,7 @@
+%TestML 0.1.0
+Diff = 1
+Label = 'YAML to Events - $BlockLabel'
+
+*in-yaml.parse == *test-event.normalize
+
+%Include yaml-test-suite/test/XXXX.tml
